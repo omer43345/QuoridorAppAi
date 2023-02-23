@@ -2,20 +2,16 @@
 
 namespace QuoridorApp
 {
-    // class that represents a wall on the board and have 5 arguments: canBePlaced, orientation, Placed, row and column in bits
+    // class that represents a wall on the board and have 3 arguments: orientation,  row and column in bits
     public class Wall
     {
 
         public readonly int _row;// 8 bits for the location of the wall in the row
         public readonly int _column;// 8 bits for the location of the wall in the column
-        private bool CanBePlaced { get; set; }
-        private bool Placed { get; set; }
-        private bool Orientation { get; set; }// true = vertical, false = horizontal
+        public readonly bool _orientation;// true = vertical, false = horizontal
         public Wall(bool orientation,int x,int y)
         {
-            CanBePlaced = true;
-            Placed = false;
-            Orientation = orientation;
+            _orientation = orientation;
             _row = 1 << (8 - x);
             _column = 1 << (8 - y);
         }
