@@ -2,11 +2,12 @@
 
 namespace QuoridorApp
 {
-    // class that represents a wall on the board and have 4 properties: canBePlaced, orientation, Placed and binary location
+    // class that represents a wall on the board and have 5 arguments: canBePlaced, orientation, Placed, row and column in bits
     public class Wall
     {
 
-        public readonly int _location;// 16 bits, first 8 for x and last 8 for y
+        public readonly int _row;// 8 bits for the location of the wall in the row
+        public readonly int _column;// 8 bits for the location of the wall in the column
         private bool CanBePlaced { get; set; }
         private bool Placed { get; set; }
         private bool Orientation { get; set; }// true = vertical, false = horizontal
@@ -15,7 +16,8 @@ namespace QuoridorApp
             CanBePlaced = true;
             Placed = false;
             Orientation = orientation;
-            _location = (1 << (16-x)) | (1 << (8-y)); 
+            _row = 1 << (8 - x);
+            _column = 1 << (8 - y);
         }
         
     }

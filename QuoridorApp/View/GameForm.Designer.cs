@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -9,7 +10,8 @@ namespace QuoridorApp
 {
     partial class GameForm
     {
-        private System.Windows.Forms.PictureBox [] walls= new System.Windows.Forms.PictureBox[128];
+        private bool _clickedOnPawn=false;
+        private List<System.Windows.Forms.PictureBox>  walls= new List<System.Windows.Forms.PictureBox>();
         private System.Windows.Forms.PictureBox[,] canMoveSquares= new System.Windows.Forms.PictureBox[9,9];
         private System.Windows.Forms.PictureBox userPawn;
         private System.Windows.Forms.PictureBox computerPawn;
@@ -35,40 +37,43 @@ namespace QuoridorApp
         
         private void AddWalls()
         {
+            PictureBox wall;
             // vertical walls
             for (int i = 0; i < 64; i++)
             {
-                walls[i] = new System.Windows.Forms.PictureBox();
-                walls[i].BackColor = System.Drawing.Color.RoyalBlue;
-                walls[i].Image = ((System.Drawing.Image)( Properties.Resources.wall));
-                walls[i].BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+                wall = new System.Windows.Forms.PictureBox();
+                wall.BackColor = System.Drawing.Color.RoyalBlue;
+                wall.Image = ((System.Drawing.Image)( Properties.Resources.wall));
+                wall.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
                 int y=i%2==0? 51: 95;
-                walls[i].Location = new System.Drawing.Point(251+(46*(i/8)), y+((i%8)/2*92));
-                walls[i].Name = "wallv" + i/8+"_"+i%8;
-                walls[i].Size = new System.Drawing.Size(6, 78);
-                walls[i].SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-                walls[i].TabIndex = 200+i;
-                walls[i].TabStop = false;
-                walls[i].Visible = false;
-                this.Controls.Add(walls[i]);
+                wall.Location = new System.Drawing.Point(251+(46*(i/8)), y+((i%8)/2*92));
+                wall.Name = "wallv" + i/8+"_"+i%8;
+                wall.Size = new System.Drawing.Size(6, 78);
+                wall.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+                wall.Visible = false;
+                wall.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PlaceWall);
+                wall.MouseLeave += new System.EventHandler(this.LeaveChosenWall);
+                this.Controls.Add(wall);
+                walls.Add(wall);
             }
             // horizontal walls
             for (int i = 64; i < 128; i++)
             {
-                walls[i] = new System.Windows.Forms.PictureBox();
-                walls[i].BackColor = System.Drawing.Color.RoyalBlue;
-                walls[i].Image = ((System.Drawing.Image)(Properties.Resources.wall));
-                walls[i].BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+                wall = new System.Windows.Forms.PictureBox();
+                wall.BackColor = System.Drawing.Color.RoyalBlue;
+                wall.Image = ((System.Drawing.Image)(Properties.Resources.wall));
+                wall.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
                 int x=i%2==0? 213: 260;
-                walls[i].Location = new System.Drawing.Point(x+((i%8)/2*92), 85+(46*(i%64/8)));
-                walls[i].Name = "wallh" + i/8+"_"+i%8;
-                walls[i].Size = new System.Drawing.Size(78, 6);
-                walls[i].SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-                walls[i].TabIndex = 200+i;
-                walls[i].TabStop = false;
-                walls[i].Visible = false;
-                walls[i].Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                this.Controls.Add(walls[i]);
+                wall.Location = new System.Drawing.Point(x+((i%8)/2*92), 85+(46*(i%64/8)));
+                wall.Name = "wallh" + i/8+"_"+i%8;
+                wall.Size = new System.Drawing.Size(78, 6);
+                wall.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+                wall.Visible = false;
+                wall.Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                wall.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PlaceWall);
+                wall.MouseLeave += new System.EventHandler(this.LeaveChosenWall);
+                this.Controls.Add(wall);
+                walls.Add(wall);
             }
         }
 
@@ -88,6 +93,7 @@ namespace QuoridorApp
                     canMoveSquares[i, j].Size = new System.Drawing.Size(40, 40);
                     canMoveSquares[i, j].SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
                     canMoveSquares[i,j].Visible = false;
+                    canMoveSquares[i, j].MouseClick += new MouseEventHandler(this.CanMoveSquaresClicked);
                     Controls.Add(canMoveSquares[i, j]);
                 }
             }
@@ -118,7 +124,6 @@ namespace QuoridorApp
             computerPawn = new System.Windows.Forms.PictureBox();
             computerPawn.BackColor = System.Drawing.Color.DarkGray;
             computerPawn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            computerPawn.Cursor = System.Windows.Forms.Cursors.Hand;  
             computerPawn.Image = ((System.Drawing.Image)(Properties.Resources.pawn2));
             computerPawn.Location = new System.Drawing.Point(395, 45);
             computerPawn.Name = "computerPawn";
@@ -130,7 +135,6 @@ namespace QuoridorApp
             userPawn = new System.Windows.Forms.PictureBox();
             userPawn.BackColor = System.Drawing.Color.DarkGray;
             userPawn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            userPawn.Cursor = System.Windows.Forms.Cursors.Hand; 
             userPawn.Image = ((System.Drawing.Image)(Properties.Resources.pawn1));
             userPawn.Location = new System.Drawing.Point(395, 413);
             userPawn.Name = "userPawn";
@@ -163,7 +167,7 @@ namespace QuoridorApp
             this.Name = "GameForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Quoridor";
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.CanPlaceVerticalWall);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.CanPlaceWall);
             this.ResumeLayout(false);
         }
         #endregion
