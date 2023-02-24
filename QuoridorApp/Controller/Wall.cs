@@ -12,8 +12,8 @@ namespace QuoridorApp
         public Wall(bool orientation,int x,int y)
         {
             _orientation = orientation;
-            _row = 1 << (8 - x);
-            _column = 1 << (8 - y);
+            _row = 1 << (7 - x);
+            _column = 1 << (7 - y);
         }
         
     }

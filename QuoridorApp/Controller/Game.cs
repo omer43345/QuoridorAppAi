@@ -1,9 +1,9 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-namespace QuoridorApp
+namespace QuoridorApp.Controller
 {
     // class that represents the game and have hashmap of walls that can be placed, contains the turn of the player and  manages the game
     public class Game
@@ -27,7 +27,10 @@ namespace QuoridorApp
         {
             for (int i = 0; i < 128; i++)
             {
-                AllowedWalls.Add(i, new Wall(i < 63, i % 8 + 1, i / 8 + 1));
+                bool orientation = i < 64;
+                int x = orientation ? i / 8 : (i - 64) % 8;
+                int y = orientation ? i % 8 : (i - 64) / 8;
+                AllowedWalls.Add(i, new Wall(orientation, x, y));
             }
             _pawns[0] = new Pawn(4, 8);
             _pawns[1] = new Pawn(4, 0);
@@ -44,19 +47,28 @@ namespace QuoridorApp
         }
         public List<Point> GetPossibleSquares()
         {
-            List<Point> possibleSquares = new List<Point>();
-            int x= _pawns[_turn]._column;
-            int y= _pawns[_turn]._row;
-            if (x > 0)
-                possibleSquares.Add(new Point( x - 1, y));
-            if (x < 8)
-                possibleSquares.Add(new Point( x + 1, y));
-            if (y > 0)
-                possibleSquares.Add(new Point( x, y - 1));
-            if (y < 8)
-                possibleSquares.Add(new Point( x, y + 1));
-            return possibleSquares;
+            int x = _pawns[_turn]._column;
+            int y = _pawns[_turn]._row;
+            Dictionary<string, Point> possibleSquares = new Dictionary<string, Point>
+            {
+                { "left", new Point(x - 1, y) },
+                { "right", new Point(x + 1, y) },
+                { "up", new Point(x, y - 1) },
+                { "down", new Point(x, y + 1) }
+            };
+            BoundariesCheck(possibleSquares);
+            CheckWalls(possibleSquares);
+            return possibleSquares.Values.ToList();
         }
+
+
+
+        /// <summary>
+        ///  update the dictionary of walls and remove the walls that are not allowed to be placed, also add the wall that was placed to the list of placed walls
+        /// </summary> 
+        /// <param name="x">representing the x of the wall we want to place</param>
+        /// <param name="y">representing the y of the wall we want to place</param>
+        /// <param name="orientation">representing the orientation of the wall we want to place</param>
         private void UpdateWallList(int x, int y, bool orientation)
         {
             foreach (var wall in AllowedWalls)
@@ -85,6 +97,43 @@ namespace QuoridorApp
         public int[] GetAllowedWallsIndexes()
         {
             return AllowedWalls.Keys.ToArray();
+        }
+
+        /// <summary>
+        /// remove the squares that are out of boundaries
+        /// </summary>
+        /// <param name="possibleSquares">Dictionary of the possible squares to move</param>
+        private void BoundariesCheck(Dictionary<String,Point> possibleSquares)
+        {
+            for (int i = possibleSquares.Keys.Count - 1; i >= 0; i--)
+            {
+                var key = possibleSquares.Keys.ElementAt(i);
+                var square = possibleSquares[key];
+                if (square.X is < 0 or > 8 || square.Y is < 0 or > 8)
+                    possibleSquares.Remove(key);
+            }
+        }
+        /// <summary>
+        ///  remove the squares that are blocked by walls
+        /// </summary>
+        /// <param name="possibleSquares">Dictionary of the possible squares to move</param>
+        private void CheckWalls(Dictionary<String,Point> possibleSquares)
+        {
+            int bitRow = _pawns[_turn]._bitRow;
+            int bitColumn = _pawns[_turn]._bitColumn;
+            foreach (var wall in _placedWalls)
+            {
+                if (wall._orientation) // horizontal for checking the left and right squares to move
+                {
+                    if ((((wall._row << 1) ^ bitRow) == 0 || (wall._row ^ bitRow) == 0) && ((wall._column ^ bitColumn) == 0 || ((wall._column << 1) ^ bitColumn) == 0))
+                        possibleSquares.Remove((wall._row^ bitRow) == 0? "left" : "right");
+                }
+                else // vertical for checking the up and down squares to move
+                {
+                    if ((((wall._column<<1)^bitColumn)==0||(wall._column^bitColumn)==0) && ((wall._row^bitRow)==0|| ((wall._row<<1)^bitRow)==0))
+                        possibleSquares.Remove((wall._column ^ bitColumn) == 0 ? "up" : "down");
+                }
+            }
         }
     }
 }

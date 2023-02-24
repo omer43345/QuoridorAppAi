@@ -11,15 +11,15 @@
         {
             _row = y;
             _column = x;
-            _bitRow = 1 << (9 - x);
-            _bitColumn = 1 << (9 - y);
+            _bitRow = 1 << (8 - x);
+            _bitColumn = 1 << (8 - y);
         }
         public void setLocation(int x,int y)
         {
             _row = y;
             _column = x;
-            _bitRow = 1 << (9 - x);
-            _bitColumn = 1 << (9 - y);
+            _bitRow = 1 << (8 - x);
+            _bitColumn = 1 << (8 - y);
         }
         
         

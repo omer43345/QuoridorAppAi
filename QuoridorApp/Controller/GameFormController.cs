@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using QuoridorApp.Controller;
 
 namespace QuoridorApp;
 // controller class that handles the logic of the game and the form
