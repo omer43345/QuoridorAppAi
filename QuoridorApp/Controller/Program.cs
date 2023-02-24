@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using QuoridorApp.View;
+using QuoridorApp.Controller;
 
 namespace QuoridorApp
 {
@@ -16,7 +18,10 @@ namespace QuoridorApp
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new GameForm());
+            GameForm gameForm = new GameForm();
+            GameFormController.GetInstance().InitializeGameFormController((GameForm) gameForm);
+            Application.Run(gameForm);
+            
         }
     }
 }

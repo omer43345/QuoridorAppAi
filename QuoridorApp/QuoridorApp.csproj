@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants.cs" />
     <Compile Include="Controller\Game.cs" />
     <Compile Include="Controller\GameFormController.cs" />
     <Compile Include="Controller\Pawn.cs" />

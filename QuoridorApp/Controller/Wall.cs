@@ -1,19 +1,17 @@
-﻿using System.Windows.Forms;
-
-namespace QuoridorApp
+﻿namespace QuoridorApp.Controller
 {
     // class that represents a wall on the board and have 3 arguments: orientation,  row and column in bits
     public class Wall
     {
 
-        public readonly int _row;// 8 bits for the location of the wall in the row
-        public readonly int _column;// 8 bits for the location of the wall in the column
-        public readonly bool _orientation;// true = vertical, false = horizontal
+        public readonly int Row;// 8 bits for the location of the wall in the row
+        public readonly int Column;// 8 bits for the location of the wall in the column
+        public readonly bool Orientation;// true = vertical, false = horizontal
         public Wall(bool orientation,int x,int y)
         {
-            _orientation = orientation;
-            _row = 1 << (7 - x);
-            _column = 1 << (7 - y);
+            Orientation = orientation;
+            Row = 1 << (7 - x);
+            Column = 1 << (7 - y);
         }
         
     }
