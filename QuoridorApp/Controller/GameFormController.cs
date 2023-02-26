@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using QuoridorApp.Model;
 using QuoridorApp.View;
 
 namespace QuoridorApp.Controller;
@@ -35,11 +36,11 @@ public class GameFormController
     }
     public void MovePawn(int x, int y)
     {
-        _game.MovePawn(x, y);
+        _game.MovePawn(new Point(x, y));
     }
-    public void PlaceWall(int x, int y, bool orientation)
+    public bool PlaceWall(int x, int y, bool orientation)
     {
-        _game.PlaceWall(x, y, orientation);
+        return _game.PlaceWall(x, y, orientation);
         
     }
 
@@ -50,7 +51,7 @@ public class GameFormController
     
     public List<Point> GetPossibleSquares()
     {
-        return _game.GetPossibleSquares();
+        return _game.GetAllowedMoves();
     }
     public bool CanPlaceWall()
     {
@@ -65,4 +66,17 @@ public class GameFormController
     {
         return _game.GetWallsCounter();
     }
+    
+    public void UpdateBoard(AiMove aiMove)
+    {
+        if (aiMove.GetMoveType())
+        {
+            _gameForm.PlaceComputerWall(aiMove.GetWallToPlace().X, aiMove.GetWallToPlace().Y, aiMove.GetWallToPlace().Orientation);
+        }
+        else
+        {
+            _gameForm.MoveComputerPawn(aiMove.GetPointToMove());
+        }
+    }
+
 }

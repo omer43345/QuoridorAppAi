@@ -48,11 +48,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="Controller\Board.cs" />
     <Compile Include="Controller\Game.cs" />
     <Compile Include="Controller\GameFormController.cs" />
     <Compile Include="Controller\Pawn.cs" />
     <Compile Include="Controller\Program.cs" />
     <Compile Include="Controller\Wall.cs" />
+    <Compile Include="Model\Ai.cs" />
+    <Compile Include="Model\AiMove.cs" />
+    <Compile Include="Model\Graph.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="View\GameForm.cs">
       <SubType>Form</SubType>
@@ -93,9 +97,6 @@
     <Content Include="Properties\pawn1.png" />
     <Content Include="Properties\pawn2.png" />
     <Content Include="Properties\wall.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Model" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using QuoridorApp.View;
 using QuoridorApp.Controller;
+using QuoridorApp.Model;
 
 namespace QuoridorApp
 {
@@ -21,6 +22,9 @@ namespace QuoridorApp
             GameForm gameForm = new GameForm();
             GameFormController.GetInstance().InitializeGameFormController((GameForm) gameForm);
             Application.Run(gameForm);
+
+
+
             
         }
     }

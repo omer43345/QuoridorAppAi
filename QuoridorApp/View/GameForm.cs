@@ -28,7 +28,6 @@ namespace QuoridorApp.View
 
         private void CanPlaceWall(object sender, MouseEventArgs e)
         {
-            // TODO: creating temp array of walls that only the legal walls are in
             if (_gameFormController.UserTurn() && _gameFormController.CanPlaceWall())
             {
                 if (!_clickedOnPawn)
@@ -90,10 +89,29 @@ namespace QuoridorApp.View
             int wallIndex = walls.IndexOf(clickedWall);
             int x = orientation? wallIndex / 8: wallIndex % 8;
             int y = orientation?wallIndex % 8: (wallIndex-64) / 8;
-            _gameFormController.PlaceWall(x, y, orientation);
+            bool allowedWall=_gameFormController.PlaceWall(x, y, orientation);
+            if (!allowedWall)
+            {
+                NotAllowedWall();
+                return;
+            }
             clickedWall.MouseLeave-=LeaveChosenWall;
             clickedWall.MouseClick -= PlaceWall;
             numOfWallsLeftForUser.Text = "USER :" +_gameFormController.GetWallsCounter();
+        }
+        
+        public void MoveComputerPawn(Point point)
+        {
+            computerPawn.Location = canMoveSquares[point.Y, point.X].Location;
+        }
+        
+        public void PlaceComputerWall(int x, int y, bool orientation)
+        {
+            int wallIndex = orientation ? x * 8 + y : 64 + y * 8 + x;
+            walls[wallIndex].Visible = true;
+            walls[wallIndex].MouseClick -= PlaceWall;
+            walls[wallIndex].MouseLeave -= LeaveChosenWall;
+            numOfWallsLeftForComputer.Text = "COMPUTER :" + _gameFormController.GetWallsCounter();
         }
 
         private void LeaveChosenWall(object sender, EventArgs e)
@@ -102,6 +120,10 @@ namespace QuoridorApp.View
             clickedWall.Visible = false;
         }
 
+        private void NotAllowedWall()
+        {
+            MessageBox.Show(WallPlacementErrorMessage);
+        }
         public void GameOver(string message)
         {
             // creating dialog box with the winner message and a button to reset the game or exit
@@ -114,8 +136,8 @@ namespace QuoridorApp.View
         private void ResetGame()
         {
             // return the form to the initial state, the pawn to the initial location and all the walls invisible and clickable
-            userPawn.Location = canMoveSquares[8, 4].Location;
-            computerPawn.Location = canMoveSquares[0, 4].Location;
+            userPawn.Location = canMoveSquares[UserPawnStartingPoint.Y,UserPawnStartingPoint.X].Location;
+            computerPawn.Location = canMoveSquares[ComputerPawnStartingPoint.Y, ComputerPawnStartingPoint.X].Location;
             foreach (var wall in walls)
             {
                 if (wall.Visible)
@@ -134,5 +156,7 @@ namespace QuoridorApp.View
         {
             ResetGame();
         }
+        
+
     }
 }
