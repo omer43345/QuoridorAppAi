@@ -111,7 +111,7 @@ namespace QuoridorApp.View
             walls[wallIndex].Visible = true;
             walls[wallIndex].MouseClick -= PlaceWall;
             walls[wallIndex].MouseLeave -= LeaveChosenWall;
-            numOfWallsLeftForComputer.Text = "COMPUTER :" + _gameFormController.GetWallsCounter();
+            numOfWallsLeftForComputer.Text = "COMPUTER :" + (_gameFormController.GetWallsCounter()-1);
         }
 
         private void LeaveChosenWall(object sender, EventArgs e)

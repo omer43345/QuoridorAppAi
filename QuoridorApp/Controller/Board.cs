@@ -7,7 +7,7 @@ namespace QuoridorApp.Controller;
 public class Board
 {
     private readonly Pawn[] _pawns;
-    private readonly List<Wall> _placedWalls;
+
     private readonly List<Point>[,] _board;// Two dimensional array that representing the board when every square has a list of points that can be reached from it
     private readonly Game _game;
     
@@ -16,7 +16,6 @@ public class Board
         _pawns = new Pawn[2];
         _pawns[0] = new Pawn(UserPawnStartingPoint);
         _pawns[1] = new Pawn(ComputerPawnStartingPoint);
-        _placedWalls = new List<Wall>();
         _board = new List<Point>[BoardSize, BoardSize];
         _game = Game.GetInstance();
         for (int i = 0; i < BoardSize; i++)
@@ -42,7 +41,6 @@ public class Board
     public void PlaceWall(int turn,Wall wall)
     {
         _pawns[turn].PlaceWall();
-        _placedWalls.Add(wall);
         UpdateBoard(wall);
     }
     

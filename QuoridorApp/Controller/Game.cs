@@ -46,27 +46,26 @@ namespace QuoridorApp.Controller
             _board.MovePawn(_turn, newLocation);
             if((newLocation.Y == 0 &&_turn == 0) || (newLocation.Y == BoardSize-1 && _turn == 1))
                 _gameFormController.GameOver(_turn==0?WinnerMessage:LoserMessage);
+            ChangeTurn();
             if (!isAi)
-            {
-                ChangeTurn();
                 MakeAiMove();
-            }
         }
         public bool PlaceWall(int x,int y, bool orientation, bool isAi=false)
         {
             Wall wall=new Wall( orientation, x, y);
             _graph.AddBoundary(wall);
-            if (_graph.GetMinimumDistanceToY(_board.GetPawnLocation(0), 0) == -1 ||
+            if (!isAi && _graph.GetMinimumDistanceToY(_board.GetPawnLocation(0), 0) == -1 ||
                 _graph.GetMinimumDistanceToY(_board.GetPawnLocation(1), BoardSize - 1) == -1)
+            {
+                _graph.RemoveBoundary(wall);
                 return false;
+            }
+                
             UpdateWallList(wall);
             _board.PlaceWall(_turn, wall);
-            _graph.AddBoundary(wall);
+            ChangeTurn();
             if (!isAi)
-            {
-                ChangeTurn();
                 MakeAiMove();
-            }
             return true;
         }
         
@@ -74,12 +73,12 @@ namespace QuoridorApp.Controller
         {
             _ai = new Ai(_graph);
             AiMove move = _ai.GetAiMove();
+            _gameFormController.UpdateBoard(move);
             if(move.GetMoveType())
                 PlaceWall(move.GetWallToPlace().X, move.GetWallToPlace().Y, move.GetWallToPlace().Orientation, true);
             else
                 MovePawn(move.GetPointToMove(),true);
-            _gameFormController.UpdateBoard(move);
-            ChangeTurn();
+            
 
         }
         
@@ -93,10 +92,10 @@ namespace QuoridorApp.Controller
             int y = square.Y;
             Dictionary<string, Point> possibleSquares = new Dictionary<string, Point>
             {
+                { "down", new Point(x, y + 1) },
                 { "left", new Point(x - 1, y) },
                 { "right", new Point(x + 1, y) },
-                { "up", new Point(x, y - 1) },
-                { "down", new Point(x, y + 1) }
+                { "up", new Point(x, y - 1) }
             };
             BoundariesCheck(possibleSquares);
             return possibleSquares.Values.ToList();

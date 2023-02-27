@@ -44,14 +44,14 @@ public class Ai
             }
         }
 
-        if (_game.GetBoard().GetWallCount(1) > 0)
+        if (_game.CanPlaceWall())
         {
             foreach( var wall in _allowedWalls)
             {
                 _graph.AddBoundary(wall.Value);
                 int userPath = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(0), 0);
                 int aiPath = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(1), BoardSize - 1);
-                if (userPathToWin != -1 && aiPathToWin != -1)
+                if (userPath != -1 && aiPath != -1)
                 {
                     userPathToWin = userPath + userWallCount;
                     aiPathToWin = aiPath + (aiWallCount - 1);

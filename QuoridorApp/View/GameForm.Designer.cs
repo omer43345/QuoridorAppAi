@@ -82,9 +82,7 @@ namespace QuoridorApp.View
             for (int i = 0; i < 64; i++)
             {
                 wall = new PictureBox();
-                wall.BackColor = Color.RoyalBlue;
                 wall.Image = ((Image)( Properties.Resources.wall));
-                wall.BackgroundImageLayout = ImageLayout.Stretch;
                 int y=i%2==0? 51: 95;
                 wall.Location = new Point(251+(46*(i/8)), y+((i%8)/2*92));
                 wall.Name = "wallv" + i/8+"_"+i%8;
@@ -100,9 +98,7 @@ namespace QuoridorApp.View
             for (int i = 64; i < 128; i++)
             {
                 wall = new PictureBox();
-                wall.BackColor = Color.RoyalBlue;
                 wall.Image = ((Image)(Properties.Resources.wall));
-                wall.BackgroundImageLayout = ImageLayout.Stretch;
                 int x=i%2==0? 213: 260;
                 wall.Location = new Point(x+((i%8)/2*92), 85+(46*(i%64/8)));
                 wall.Name = "wallh" + i/8+"_"+i%8;
