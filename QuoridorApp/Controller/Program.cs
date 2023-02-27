@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using QuoridorApp.View;
-using QuoridorApp.Controller;
-using QuoridorApp.Model;
 
-namespace QuoridorApp
+namespace QuoridorApp.Controller
 {
     static class Program
     {
@@ -20,7 +15,7 @@ namespace QuoridorApp
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             GameForm gameForm = new GameForm();
-            GameFormController.GetInstance().InitializeGameFormController((GameForm) gameForm);
+            GameFormController.GetInstance().InitializeGameFormController(gameForm);
             Application.Run(gameForm);
 
 

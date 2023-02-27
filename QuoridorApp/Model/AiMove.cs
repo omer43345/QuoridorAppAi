@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using QuoridorApp.Controller;
 
 namespace QuoridorApp.Model;
 // class that representing the ai chosen move, contains wall to place or point to move to

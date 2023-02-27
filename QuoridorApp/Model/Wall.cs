@@ -1,4 +1,4 @@
-﻿namespace QuoridorApp.Controller
+﻿namespace QuoridorApp.Model
 {
     // class that represents a wall on the board and have 3 arguments: orientation,  row and column in bits
     public class Wall

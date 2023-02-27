@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using static QuoridorApp.Constants;
 
-namespace QuoridorApp.Controller
+namespace QuoridorApp.Model
 {
     // class that represents a pawn on the board and have 2 properties: row and column in bits
     public class Pawn
@@ -11,7 +11,7 @@ namespace QuoridorApp.Controller
         public Pawn(Point startLocation)
         {
             Location = startLocation;
-            _wallCount = 10;
+            _wallCount = WallsPerPlayer;
         }
         public void SetLocation(Point newLocation)
         {

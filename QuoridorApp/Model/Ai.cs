@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using QuoridorApp.Controller;
 using static QuoridorApp.Constants;
 
 namespace QuoridorApp.Model;
@@ -25,15 +24,15 @@ public class Ai
     
     private void EvaluateMove()
     {
-        Dictionary<int,Wall> _allowedWalls = _game.GetAllowedWalls();
-        List<Point> _allowedMoves = _game.GetAllowedMoves();
+        Dictionary<int,Wall> allowedWalls = _game.GetAllowedWalls();
+        List<Point> allowedMoves = _game.GetAllowedMoves();
         int userWallCount = _game.GetBoard().GetWallCount(0);
         int aiWallCount = _game.GetBoard().GetWallCount(1);
         int userPathToWin = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(0), 0)+ userWallCount;
         int aiPathToWin = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(1), BoardSize - 1)+aiWallCount;
         int maxDifference = userPathToWin - aiPathToWin;
 
-        foreach (var move in _allowedMoves)
+        foreach (var move in allowedMoves)
         {
             int aiPath = _graph.GetMinimumDistanceToY(move, BoardSize - 1);
             aiPathToWin = aiPath+aiWallCount;
@@ -46,7 +45,7 @@ public class Ai
 
         if (_game.CanPlaceWall())
         {
-            foreach( var wall in _allowedWalls)
+            foreach( var wall in allowedWalls)
             {
                 _graph.AddBoundary(wall.Value);
                 int userPath = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(0), 0);

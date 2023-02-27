@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using QuoridorApp.Model;
+using QuoridorApp.Controller;
 using static QuoridorApp.Constants;
 
-namespace QuoridorApp.Controller
+namespace QuoridorApp.Model
 {
     // class that represents the game and have hashmap of walls that can be placed, contains the turn of the player and  manages the game
     public class Game

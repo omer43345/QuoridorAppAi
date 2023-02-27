@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using QuoridorApp.Controller;
 using static QuoridorApp.Constants;
 
-namespace QuoridorApp.Controller;
+namespace QuoridorApp.Model;
 
 public class Board
 {

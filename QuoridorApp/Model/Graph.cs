@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using QuoridorApp.Controller;
 using static QuoridorApp.Constants;
 
 
