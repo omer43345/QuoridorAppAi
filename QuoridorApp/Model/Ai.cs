@@ -27,25 +27,24 @@ public class Ai
     {
         Dictionary<int, Wall> allowedWalls = _game.GetAllowedWalls();
         List<Point> allowedMoves = _game.GetAllowedMoves();
-        int userWallCount = _game.GetBoard().GetWallCount(0);
-        int aiWallCount = _game.GetBoard().GetWallCount(1);
-        int userPathToWin = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(0), 0) + userWallCount;
-        int aiPathToWin = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(1), BoardSize - 1) +
-                          aiWallCount;
+        int userPathToWin = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(0), 0) ;
+        int aiPathToWin = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(1), BoardSize - 1);
         int maxDifference = userPathToWin - aiPathToWin;
 
         foreach (var move in allowedMoves)
         {
             int aiPath = _graph.GetMinimumDistanceToY(move, BoardSize - 1);
-            aiPathToWin = aiPath + aiWallCount;
+            aiPathToWin = aiPath;
+            
             if (userPathToWin - aiPathToWin > maxDifference)
             {
                 maxDifference = userPathToWin - aiPathToWin;
                 _aiMove = new AiMove(move);
             }
         }
-
-        if (_game.CanPlaceWall())
+        int userWallCount = _game.GetBoard().GetWallCount(0);
+        int aiWallCount = _game.GetBoard().GetWallCount(1)-1;
+        if (aiWallCount >= 0 )
         {
             foreach (var wall in allowedWalls)
             {
@@ -54,8 +53,8 @@ public class Ai
                 int aiPath = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(1), BoardSize - 1);
                 if (userPath != -1 && aiPath != -1)
                 {
-                    userPathToWin = userPath + userWallCount;
-                    aiPathToWin = aiPath + (aiWallCount - 1);
+                    userPathToWin = userPath + aiWallCount;
+                    aiPathToWin = aiPath + userWallCount;
                     if (userPathToWin - aiPathToWin > maxDifference)
                     {
                         maxDifference = userPathToWin - aiPathToWin;
