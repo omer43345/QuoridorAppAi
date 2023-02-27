@@ -11,6 +11,7 @@ namespace QuoridorApp.View
     {
         private GameFormController _gameFormController;
         private List<Point> _possibleSquares;
+
         public GameForm()
         {
             AddPawns();
@@ -23,7 +24,6 @@ namespace QuoridorApp.View
             _gameFormController = GameFormController.GetInstance();
             _possibleSquares = new List<Point>();
         }
-
 
 
         private void CanPlaceWall(object sender, MouseEventArgs e)
@@ -45,8 +45,6 @@ namespace QuoridorApp.View
                                e.X >= walls[index].Location.X && e.X <= walls[index].Location.X + walls[index].Width);
                         walls[index].Visible = placeWall;
                     }
-
-
                 }
             }
         }
@@ -58,28 +56,27 @@ namespace QuoridorApp.View
             {
                 _clickedOnPawn = !_clickedOnPawn;
                 _possibleSquares = _gameFormController.GetPossibleSquares();
-                ChangeVisibilityOfCanMoveSquares(_possibleSquares, _clickedOnPawn);    
+                ChangeVisibilityOfCanMoveSquares(_possibleSquares, _clickedOnPawn);
             }
         }
+
         private void ChangeVisibilityOfCanMoveSquares(List<Point> possibleSquares, bool visible)
         {
             foreach (var square in possibleSquares)
             {
-                canMoveSquares[square.Y,square.X].Visible = visible;
+                canMoveSquares[square.Y, square.X].Visible = visible;
             }
         }
 
         private void CanMoveSquaresClicked(object sender, MouseEventArgs e)
         {
-            
             PictureBox clickedSquare = (PictureBox)sender;
             int x = (clickedSquare.Location.X - 158) / 32;
             int y = (clickedSquare.Location.Y - 37) / 37;
-            _clickedOnPawn = false;           
+            _clickedOnPawn = false;
             ChangeVisibilityOfCanMoveSquares(_possibleSquares, false);
             userPawn.Location = clickedSquare.Location;
             _gameFormController.MovePawn(x, y);
-
         }
 
         private void PlaceWall(object sender, MouseEventArgs e)
@@ -87,31 +84,32 @@ namespace QuoridorApp.View
             PictureBox clickedWall = (PictureBox)sender;
             bool orientation = clickedWall.Height > clickedWall.Width;
             int wallIndex = walls.IndexOf(clickedWall);
-            int x = orientation? wallIndex / 8: wallIndex % 8;
-            int y = orientation?wallIndex % 8: (wallIndex-64) / 8;
-            bool allowedWall=_gameFormController.PlaceWall(x, y, orientation);
+            int x = orientation ? wallIndex / 8 : wallIndex % 8;
+            int y = orientation ? wallIndex % 8 : (wallIndex - 64) / 8;
+            bool allowedWall = _gameFormController.PlaceWall(x, y, orientation);
             if (!allowedWall)
             {
                 NotAllowedWall();
                 return;
             }
-            clickedWall.MouseLeave-=LeaveChosenWall;
+
+            clickedWall.MouseLeave -= LeaveChosenWall;
             clickedWall.MouseClick -= PlaceWall;
-            numOfWallsLeftForUser.Text = "USER :" +_gameFormController.GetWallsCounter();
+            numOfWallsLeftForUser.Text = "USER :" + _gameFormController.GetWallsCounter();
         }
-        
+
         public void MoveComputerPawn(Point point)
         {
             computerPawn.Location = canMoveSquares[point.Y, point.X].Location;
         }
-        
+
         public void PlaceComputerWall(int x, int y, bool orientation)
         {
             int wallIndex = orientation ? x * 8 + y : 64 + y * 8 + x;
             walls[wallIndex].Visible = true;
             walls[wallIndex].MouseClick -= PlaceWall;
             walls[wallIndex].MouseLeave -= LeaveChosenWall;
-            numOfWallsLeftForComputer.Text = "COMPUTER :" + (_gameFormController.GetWallsCounter()-1);
+            numOfWallsLeftForComputer.Text = "COMPUTER :" + (_gameFormController.GetWallsCounter() - 1);
         }
 
         private void LeaveChosenWall(object sender, EventArgs e)
@@ -124,19 +122,21 @@ namespace QuoridorApp.View
         {
             MessageBox.Show(WallPlacementErrorMessage);
         }
+
         public void GameOver(string message)
         {
             // creating dialog box with the winner message and a button to reset the game or exit
-            DialogResult dialogResult = MessageBox.Show(message+"\n"+RestartMessage, "Game Over", MessageBoxButtons.YesNo);
+            DialogResult dialogResult =
+                MessageBox.Show(message + "\n" + RestartMessage, "Game Over", MessageBoxButtons.YesNo);
             if (dialogResult == DialogResult.No)
                 Application.Exit();
             ResetGame();
-
         }
+
         private void ResetGame()
         {
             // return the form to the initial state, the pawn to the initial location and all the walls invisible and clickable
-            userPawn.Location = canMoveSquares[UserPawnStartingPoint.Y,UserPawnStartingPoint.X].Location;
+            userPawn.Location = canMoveSquares[UserPawnStartingPoint.Y, UserPawnStartingPoint.X].Location;
             computerPawn.Location = canMoveSquares[ComputerPawnStartingPoint.Y, ComputerPawnStartingPoint.X].Location;
             foreach (var wall in walls)
             {
@@ -147,16 +147,15 @@ namespace QuoridorApp.View
                     wall.MouseLeave += LeaveChosenWall;
                 }
             }
+
             numOfWallsLeftForUser.Text = "USER : 10";
             numOfWallsLeftForComputer.Text = "COMPUTER : 10";
             _gameFormController.ResetGame();
         }
-        
+
         private void ResetGameButton_Click(object sender, EventArgs e)
         {
             ResetGame();
         }
-        
-
     }
 }

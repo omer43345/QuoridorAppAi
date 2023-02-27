@@ -17,10 +17,6 @@ namespace QuoridorApp.Controller
             GameForm gameForm = new GameForm();
             GameFormController.GetInstance().InitializeGameFormController(gameForm);
             Application.Run(gameForm);
-
-
-
-            
         }
     }
 }

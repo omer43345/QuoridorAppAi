@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "type": "dotnet",
+            "name": "runQuoridor",
+            "projectPath": "$PROJECT_DIR$\\QuoridorApp\\QuoridorApp.csproj",
+            "exePath": "$PROJECT_DIR$\\QuoridorApp\\bin\\Debug\\QuoridorApp.exe",
+            "args": [],
+        },
+
+    ]
+}

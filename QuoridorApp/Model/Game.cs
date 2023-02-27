@@ -11,8 +11,8 @@ namespace QuoridorApp.Model
     public class Game
     {
         private static Game _instance;
-        private static Dictionary<int,Wall> _allowedWalls;
-        private static int _turn;// 0 = user, 1 = computer
+        private static Dictionary<int, Wall> _allowedWalls;
+        private static int _turn; // 0 = user, 1 = computer
         private GameFormController _gameFormController = GameFormController.GetInstance();
         private static Board _board;
         private static Graph _graph;
@@ -25,34 +25,45 @@ namespace QuoridorApp.Model
                 _instance = new Game();
                 InitializeGame();
             }
+
             return _instance;
         }
+
         private static void InitializeGame()
         {
             _allowedWalls = new Dictionary<int, Wall>();
             _board = new Board();
             _graph = new Graph(_board);
-            for (int i = 0; i < NumberOfWallsInTheBoard; i++)// first 64 are vertical walls and the rest are horizontal walls
+            for (int i = 0;
+                 i < NumberOfWallsInTheBoard;
+                 i++) // first 64 are vertical walls and the rest are horizontal walls
             {
                 bool orientation = i < NumberOfWallsInTheBoard / 2;
-                int x = orientation ? i / WallsPerRowAndColumn : (i - NumberOfWallsInTheBoard / 2) % WallsPerRowAndColumn;
-                int y = orientation ? i % WallsPerRowAndColumn : (i - NumberOfWallsInTheBoard / 2) / WallsPerRowAndColumn;
+                int x = orientation
+                    ? i / WallsPerRowAndColumn
+                    : (i - NumberOfWallsInTheBoard / 2) % WallsPerRowAndColumn;
+                int y = orientation
+                    ? i % WallsPerRowAndColumn
+                    : (i - NumberOfWallsInTheBoard / 2) / WallsPerRowAndColumn;
                 _allowedWalls.Add(i, new Wall(orientation, x, y));
             }
+
             _turn = 0;
         }
-        public void MovePawn(Point newLocation, bool isAi=false)
+
+        public void MovePawn(Point newLocation, bool isAi = false)
         {
             _board.MovePawn(_turn, newLocation);
-            if((newLocation.Y == 0 &&_turn == 0) || (newLocation.Y == BoardSize-1 && _turn == 1))
-                _gameFormController.GameOver(_turn==0?WinnerMessage:LoserMessage);
+            if ((newLocation.Y == 0 && _turn == 0) || (newLocation.Y == BoardSize - 1 && _turn == 1))
+                _gameFormController.GameOver(_turn == 0 ? WinnerMessage : LoserMessage);
             ChangeTurn();
             if (!isAi)
                 MakeAiMove();
         }
-        public bool PlaceWall(int x,int y, bool orientation, bool isAi=false)
+
+        public bool PlaceWall(int x, int y, bool orientation, bool isAi = false)
         {
-            Wall wall=new Wall( orientation, x, y);
+            Wall wall = new Wall(orientation, x, y);
             _graph.AddBoundary(wall);
             if (!isAi && _graph.GetMinimumDistanceToY(_board.GetPawnLocation(0), 0) == -1 ||
                 _graph.GetMinimumDistanceToY(_board.GetPawnLocation(1), BoardSize - 1) == -1)
@@ -60,7 +71,7 @@ namespace QuoridorApp.Model
                 _graph.RemoveBoundary(wall);
                 return false;
             }
-                
+
             UpdateWallList(wall);
             _board.PlaceWall(_turn, wall);
             ChangeTurn();
@@ -68,24 +79,23 @@ namespace QuoridorApp.Model
                 MakeAiMove();
             return true;
         }
-        
+
         private void MakeAiMove()
         {
             _ai = new Ai(_graph);
             AiMove move = _ai.GetAiMove();
             _gameFormController.UpdateBoard(move);
-            if(move.GetMoveType())
+            if (move.GetMoveType())
                 PlaceWall(move.GetWallToPlace().X, move.GetWallToPlace().Y, move.GetWallToPlace().Orientation, true);
             else
-                MovePawn(move.GetPointToMove(),true);
-            
-
+                MovePawn(move.GetPointToMove(), true);
         }
-        
+
         public bool CanPlaceWall()
         {
-            return _board.GetWallCount(_turn)>0;
+            return _board.GetWallCount(_turn) > 0;
         }
+
         public List<Point> GetPossibleSquares(Point square)
         {
             int x = square.X;
@@ -100,15 +110,14 @@ namespace QuoridorApp.Model
             BoundariesCheck(possibleSquares);
             return possibleSquares.Values.ToList();
         }
-        
-        
+
+
         public List<Point> GetAllowedMoves()
         {
             return _board.GetAllowedMoves(_turn);
         }
-        
-        
-        
+
+
         /// <summary>
         ///  update the dictionary of walls and remove the walls that are not allowed to be placed, also add the wall that was placed to the list of placed walls
         /// </summary>
@@ -119,13 +128,19 @@ namespace QuoridorApp.Model
             {
                 if (wall.Value.Orientation == placedWall.Orientation)
                 {
-                    int wallX = placedWall.Orientation ? wall.Key / WallsPerRowAndColumn : (wall.Key - NumberOfWallsInTheBoard / 2) % WallsPerRowAndColumn;
-                    int wallY = placedWall.Orientation ? wall.Key % WallsPerRowAndColumn : (wall.Key - NumberOfWallsInTheBoard / 2) / WallsPerRowAndColumn;
+                    int wallX = placedWall.Orientation
+                        ? wall.Key / WallsPerRowAndColumn
+                        : (wall.Key - NumberOfWallsInTheBoard / 2) % WallsPerRowAndColumn;
+                    int wallY = placedWall.Orientation
+                        ? wall.Key % WallsPerRowAndColumn
+                        : (wall.Key - NumberOfWallsInTheBoard / 2) / WallsPerRowAndColumn;
                     if (wallX == placedWall.X && wallY == placedWall.Y)
                     {
                         int i = wall.Key;
                         _allowedWalls.Remove(i);
-                        int index = placedWall.Orientation ? wallY*WallsPerRowAndColumn+wallX+ (NumberOfWallsInTheBoard / 2) : wallY+wallX*WallsPerRowAndColumn;
+                        int index = placedWall.Orientation
+                            ? wallY * WallsPerRowAndColumn + wallX + (NumberOfWallsInTheBoard / 2)
+                            : wallY + wallX * WallsPerRowAndColumn;
                         _allowedWalls.Remove(index);
                         if ((i % WallsPerRowAndColumn) > 0)
                             _allowedWalls.Remove(i - 1);
@@ -136,6 +151,7 @@ namespace QuoridorApp.Model
                 }
             }
         }
+
         public int[] GetAllowedWallsIndexes()
         {
             return _allowedWalls.Keys.ToArray();
@@ -145,7 +161,7 @@ namespace QuoridorApp.Model
         /// remove the squares that are out of boundaries
         /// </summary>
         /// <param name="possibleSquares">Dictionary of the possible squares to move</param>
-        private void BoundariesCheck(Dictionary<String,Point> possibleSquares)
+        private void BoundariesCheck(Dictionary<String, Point> possibleSquares)
         {
             for (int i = possibleSquares.Keys.Count - 1; i >= 0; i--)
             {
@@ -155,9 +171,6 @@ namespace QuoridorApp.Model
                     possibleSquares.Remove(key);
             }
         }
-
-
-
 
 
         public bool UserTurn()
@@ -174,6 +187,7 @@ namespace QuoridorApp.Model
         {
             InitializeGame();
         }
+
         private void ChangeTurn()
         {
             _turn = _turn == 0 ? 1 : 0;
@@ -189,5 +203,4 @@ namespace QuoridorApp.Model
             return _board;
         }
     }
-    
 }

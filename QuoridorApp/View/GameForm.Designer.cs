@@ -7,13 +7,13 @@ namespace QuoridorApp.View
 {
     partial class GameForm
     {
-        private bool _clickedOnPawn=false;
-        private List<System.Windows.Forms.PictureBox>  walls= new List<PictureBox>();
-        private PictureBox[,] canMoveSquares= new PictureBox[9,9];
+        private bool _clickedOnPawn = false;
+        private List<System.Windows.Forms.PictureBox> walls = new List<PictureBox>();
+        private PictureBox[,] canMoveSquares = new PictureBox[9, 9];
         private PictureBox userPawn;
         private PictureBox computerPawn;
-        private Label  numOfWallsLeftForUser;
-        private Label  numOfWallsLeftForComputer;
+        private Label numOfWallsLeftForUser;
+        private Label numOfWallsLeftForComputer;
         private Button resetGameButton;
 
         /// <summary>
@@ -34,6 +34,7 @@ namespace QuoridorApp.View
 
             base.Dispose(disposing);
         }
+
         private void AddResetGameButton()
         {
             resetGameButton = new Button();
@@ -45,23 +46,24 @@ namespace QuoridorApp.View
             resetGameButton.MouseClick += new MouseEventHandler(ResetGameButton_Click);
             Controls.Add(resetGameButton);
         }
+
         private void AddWallCounters()
         {
             numOfWallsLeftForUser = new Label();
             numOfWallsLeftForComputer = new Label();
             Label WallLeftLabel = new Label();
-            
-            
+
+
             WallLeftLabel.Location = new Point(12, 0);
             WallLeftLabel.Name = "Walls_Left";
             WallLeftLabel.Text = "Walls Left";
-            WallLeftLabel.Font = new Font(WallLeftLabel.Font.FontFamily, 13,FontStyle.Bold | FontStyle.Underline);
+            WallLeftLabel.Font = new Font(WallLeftLabel.Font.FontFamily, 13, FontStyle.Bold | FontStyle.Underline);
             WallLeftLabel.Size = new Size(150, 30);
-            
+
             numOfWallsLeftForUser.Location = new Point(12, 30);
             numOfWallsLeftForUser.Name = "USER";
             numOfWallsLeftForUser.Text = "USER : 10";
-            numOfWallsLeftForUser.Font = new Font(numOfWallsLeftForComputer.Font.FontFamily,8, FontStyle.Bold);
+            numOfWallsLeftForUser.Font = new Font(numOfWallsLeftForComputer.Font.FontFamily, 8, FontStyle.Bold);
             numOfWallsLeftForUser.Size = new Size(150, 20);
 
             numOfWallsLeftForComputer.Location = new Point(12, 55);
@@ -73,8 +75,8 @@ namespace QuoridorApp.View
             Controls.Add(numOfWallsLeftForUser);
             Controls.Add(numOfWallsLeftForComputer);
             Controls.Add(WallLeftLabel);
-            
         }
+
         private void AddWalls()
         {
             PictureBox wall;
@@ -82,10 +84,10 @@ namespace QuoridorApp.View
             for (int i = 0; i < 64; i++)
             {
                 wall = new PictureBox();
-                wall.Image = ((Image)( Properties.Resources.wall));
-                int y=i%2==0? 51: 95;
-                wall.Location = new Point(251+(46*(i/8)), y+((i%8)/2*92));
-                wall.Name = "wallv" + i/8+"_"+i%8;
+                wall.Image = ((Image)(Properties.Resources.wall));
+                int y = i % 2 == 0 ? 51 : 95;
+                wall.Location = new Point(251 + (46 * (i / 8)), y + ((i % 8) / 2 * 92));
+                wall.Name = "wallv" + i / 8 + "_" + i % 8;
                 wall.Size = new Size(6, 78);
                 wall.SizeMode = PictureBoxSizeMode.CenterImage;
                 wall.Visible = false;
@@ -94,14 +96,15 @@ namespace QuoridorApp.View
                 this.Controls.Add(wall);
                 walls.Add(wall);
             }
+
             // horizontal walls
             for (int i = 64; i < 128; i++)
             {
                 wall = new PictureBox();
                 wall.Image = ((Image)(Properties.Resources.wall));
-                int x=i%2==0? 213: 260;
-                wall.Location = new Point(x+((i%8)/2*92), 85+(46*(i%64/8)));
-                wall.Name = "wallh" + i/8+"_"+i%8;
+                int x = i % 2 == 0 ? 213 : 260;
+                wall.Location = new Point(x + ((i % 8) / 2 * 92), 85 + (46 * (i % 64 / 8)));
+                wall.Name = "wallh" + i / 8 + "_" + i % 8;
                 wall.Size = new Size(78, 6);
                 wall.SizeMode = PictureBoxSizeMode.CenterImage;
                 wall.Visible = false;
@@ -125,10 +128,10 @@ namespace QuoridorApp.View
                     canMoveSquares[i, j].BackgroundImageLayout = ImageLayout.Center;
                     canMoveSquares[i, j].Image = ((Image)(canMoveSquare));
                     canMoveSquares[i, j].Location = new Point(211 + (46 * j), 45 + (46 * i));
-                    canMoveSquares[i, j].Name = "canMoveSquare" + (i+1)*(j+1);
+                    canMoveSquares[i, j].Name = "canMoveSquare" + (i + 1) * (j + 1);
                     canMoveSquares[i, j].Size = new Size(40, 40);
                     canMoveSquares[i, j].SizeMode = PictureBoxSizeMode.CenterImage;
-                    canMoveSquares[i,j].Visible = false;
+                    canMoveSquares[i, j].Visible = false;
                     canMoveSquares[i, j].MouseClick += new MouseEventHandler(this.CanMoveSquaresClicked);
                     Controls.Add(canMoveSquares[i, j]);
                 }
@@ -145,7 +148,7 @@ namespace QuoridorApp.View
                     PictureBox boardSquare = new PictureBox();
                     boardSquare.Image = ((Image)(square));
                     boardSquare.Location = new Point(211 + (46 * j), 45 + (46 * i));
-                    boardSquare.Name = "square" + (i+1)*(j+1);
+                    boardSquare.Name = "square" + (i + 1) * (j + 1);
                     boardSquare.Size = new Size(40, 40);
                     Controls.Add(boardSquare);
                 }
@@ -180,7 +183,7 @@ namespace QuoridorApp.View
             Controls.Add(computerPawn);
             Controls.Add(userPawn);
         }
-        
+
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -189,7 +192,8 @@ namespace QuoridorApp.View
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameForm));
+            System.ComponentModel.ComponentResourceManager resources =
+                new System.ComponentModel.ComponentResourceManager(typeof(GameForm));
             this.SuspendLayout();
             // 
             // GameForm

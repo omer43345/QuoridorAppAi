@@ -7,20 +7,24 @@ namespace QuoridorApp.Model
     public class Pawn
     {
         public Point Location;
-        private int _wallCount;// the number of walls that the pawn has left
+        private int _wallCount; // the number of walls that the pawn has left
+
         public Pawn(Point startLocation)
         {
             Location = startLocation;
             _wallCount = WallsPerPlayer;
         }
+
         public void SetLocation(Point newLocation)
         {
             Location = newLocation;
         }
+
         public void PlaceWall()
         {
             _wallCount--;
         }
+
         public int GetWallCount()
         {
             return _wallCount;

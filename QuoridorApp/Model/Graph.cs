@@ -13,7 +13,7 @@ public class Node
     private bool _isVisited;
     private Node _parent;
     private int _distance;
-    
+
     public Node(Point point)
     {
         _point = point;
@@ -22,32 +22,32 @@ public class Node
         _parent = null;
         _distance = 0;
     }
-    
+
     public void AddNeighbor(Node node)
     {
         _neighbors.Add(node);
     }
-    
+
     public void RemoveNeighbor(Node node)
     {
         _neighbors.Remove(node);
     }
-    
+
     public List<Node> GetNeighbors()
     {
         return _neighbors;
     }
-    
+
     public int GetDistance()
     {
         return _distance;
     }
-    
+
     public void SetDistance(int distance)
     {
         _distance = distance;
     }
-    
+
     public Point GetPoint()
     {
         return _point;
@@ -58,18 +58,19 @@ public class Node
     {
         _parent = current;
     }
-    
+
     public void NotVisited()
     {
         _isVisited = false;
     }
 }
+
 // class that creating the graph of the board and contains some graph algorithms
 public class Graph
 {
     private Board _board;
     private List<Node> _nodes;
-    
+
     public Graph(Board board)
     {
         _board = board;
@@ -85,10 +86,11 @@ public class Graph
         {
             for (int j = 0; j < BoardSize; j++)
             {
-                Node node = new Node(new Point(j,i));
+                Node node = new Node(new Point(j, i));
                 _nodes.Add(node);
             }
         }
+
         // add neighbors to each node in the graph according to the board
         for (int i = 0; i < BoardSize; i++)
         {
@@ -102,38 +104,34 @@ public class Graph
             }
         }
     }
-    
 
 
-    
-    
-    
     // BFS algorithm that returns the minimum distance between starting point and the point with Y-coordinate equal to y
     public int GetMinimumDistanceToY(Point point, int y)
     {
         ResetGraph();
         // Find the starting node based on its coordinates
         Node start = _nodes[point.X + point.Y * BoardSize];
-    
+
         // Initialize BFS variables
         Queue<Node> queue = new Queue<Node>();
         HashSet<Node> visited = new HashSet<Node>();
-    
+
         // Enqueue the starting node and mark it as visited
         queue.Enqueue(start);
         visited.Add(start);
-    
+
         // BFS algorithm
         while (queue.Count > 0)
         {
             Node current = queue.Dequeue();
-        
+
             // Check if the current node has Y-coordinate equal to y
             if (current.GetPoint().Y == y)
             {
                 return current.GetDistance();
             }
-        
+
             // Visit each neighbor of the current node that hasn't been visited yet
             foreach (Node neighbor in current.GetNeighbors())
             {
@@ -150,14 +148,14 @@ public class Graph
         // If no node with Y-coordinate equal to y was found, return -1
         return -1;
     }
-    
+
     // reset the nodes of the graph
     private void ResetGraph()
     {
         foreach (Node node in _nodes)
         {
             node.SetDistance(0);
-            node.SetParent( null);
+            node.SetParent(null);
             node.NotVisited();
         }
     }
@@ -167,7 +165,7 @@ public class Graph
         int x = wall.X;
         int y = wall.Y;
         bool orientation = wall.Orientation;
-        Dictionary<Node,Node> neighborsToAdd = new Dictionary<Node,Node>();
+        Dictionary<Node, Node> neighborsToAdd = new Dictionary<Node, Node>();
         if (orientation)
         {
             neighborsToAdd.Add(_nodes[x + y * BoardSize], _nodes[x + 1 + y * BoardSize]);
@@ -178,19 +176,20 @@ public class Graph
         else
         {
             neighborsToAdd.Add(_nodes[x + y * BoardSize], _nodes[x + (y + 1) * BoardSize]);
-            neighborsToAdd.Add(_nodes[x+1 + y * BoardSize], _nodes[x+1 + (y+1) * BoardSize]);
+            neighborsToAdd.Add(_nodes[x + 1 + y * BoardSize], _nodes[x + 1 + (y + 1) * BoardSize]);
             neighborsToAdd.Add(_nodes[x + (y + 1) * BoardSize], _nodes[x + y * BoardSize]);
-            neighborsToAdd.Add(_nodes[x+1 + (y + 1) * BoardSize], _nodes[x+1 + y * BoardSize]);
+            neighborsToAdd.Add(_nodes[x + 1 + (y + 1) * BoardSize], _nodes[x + 1 + y * BoardSize]);
         }
+
         AddOrRemoveNeighbors(neighborsToAdd);
     }
-    
+
     public void AddBoundary(Wall wall)
     {
         int x = wall.X;
         int y = wall.Y;
         bool orientation = wall.Orientation;
-        Dictionary<Node,Node> neighborsToRemove = new Dictionary<Node,Node>();
+        Dictionary<Node, Node> neighborsToRemove = new Dictionary<Node, Node>();
         if (orientation)
         {
             neighborsToRemove.Add(_nodes[x + y * BoardSize], _nodes[x + 1 + y * BoardSize]);
@@ -201,30 +200,29 @@ public class Graph
         else
         {
             neighborsToRemove.Add(_nodes[x + y * BoardSize], _nodes[x + (y + 1) * BoardSize]);
-            neighborsToRemove.Add(_nodes[x+1 + y * BoardSize], _nodes[x+1 + (y+1) * BoardSize]);
+            neighborsToRemove.Add(_nodes[x + 1 + y * BoardSize], _nodes[x + 1 + (y + 1) * BoardSize]);
             neighborsToRemove.Add(_nodes[x + (y + 1) * BoardSize], _nodes[x + y * BoardSize]);
-            neighborsToRemove.Add(_nodes[x+1 + (y + 1) * BoardSize], _nodes[x+1 + y * BoardSize]);
+            neighborsToRemove.Add(_nodes[x + 1 + (y + 1) * BoardSize], _nodes[x + 1 + y * BoardSize]);
         }
-        AddOrRemoveNeighbors(neighborsToRemove,false);
+
+        AddOrRemoveNeighbors(neighborsToRemove, false);
     }
-    
-    private void AddOrRemoveNeighbors(Dictionary<Node,Node> neighborsToRemove, bool add = true)
+
+    private void AddOrRemoveNeighbors(Dictionary<Node, Node> neighborsToRemove, bool add = true)
     {
         if (add)
         {
-            foreach (KeyValuePair<Node,Node> pair in neighborsToRemove)
+            foreach (KeyValuePair<Node, Node> pair in neighborsToRemove)
             {
                 pair.Key.AddNeighbor(pair.Value);
             }
         }
         else
         {
-            foreach (KeyValuePair<Node,Node> pair in neighborsToRemove)
+            foreach (KeyValuePair<Node, Node> pair in neighborsToRemove)
             {
                 pair.Key.RemoveNeighbor(pair.Value);
             }
         }
-
     }
-
 }
