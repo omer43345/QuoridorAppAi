@@ -30,12 +30,10 @@ public class Ai
         int userPathToWin = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(0), 0) ;
         int aiPathToWin = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(1), BoardSize - 1);
         int maxDifference = userPathToWin - aiPathToWin;
-
+        
         foreach (var move in allowedMoves)
         {
-            int aiPath = _graph.GetMinimumDistanceToY(move, BoardSize - 1);
-            aiPathToWin = aiPath;
-            
+            aiPathToWin  = _graph.GetMinimumDistanceToY(move, BoardSize - 1);
             if (userPathToWin - aiPathToWin > maxDifference)
             {
                 maxDifference = userPathToWin - aiPathToWin;
@@ -44,7 +42,7 @@ public class Ai
         }
         int userWallCount = _game.GetBoard().GetWallCount(0);
         int aiWallCount = _game.GetBoard().GetWallCount(1)-1;
-        if (aiWallCount >= 0 )
+        if (aiWallCount >= 0 && aiPathToWin > userPathToWin)
         {
             foreach (var wall in allowedWalls)
             {

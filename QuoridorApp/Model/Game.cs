@@ -17,6 +17,7 @@ namespace QuoridorApp.Model
         private static Board _board;
         private static Graph _graph;
         private static Ai _ai;
+        private static List<Wall> _placedWalls;
 
         public static Game GetInstance()
         {
@@ -31,6 +32,7 @@ namespace QuoridorApp.Model
 
         private static void InitializeGame()
         {
+            _placedWalls = new List<Wall>();
             _allowedWalls = new Dictionary<int, Wall>();
             _board = new Board();
             _graph = new Graph(_board);
@@ -53,17 +55,33 @@ namespace QuoridorApp.Model
 
         public void MovePawn(Point newLocation, bool isAi = false)
         {
+            if (_board.GetIfSpecialMove())
+            {
+                _board.RemoveSpecialMovePoints(_placedWalls);
+                _graph = new Graph(_board);
+            }
             _board.MovePawn(_turn, newLocation);
             if ((newLocation.Y == 0 && _turn == 0) || (newLocation.Y == BoardSize - 1 && _turn == 1))
                 _gameFormController.GameOver(_turn == 0 ? WinnerMessage : LoserMessage);
+            if (_board.GetIfSpecialMove())
+            {
+                _graph = new Graph(_board);
+            }
             ChangeTurn();
             if (!isAi)
                 MakeAiMove();
         }
+        
 
         public bool PlaceWall(int x, int y, bool orientation, bool isAi = false)
         {
+            if (_board.GetIfSpecialMove())
+            {
+                _board.RemoveSpecialMovePoints(_placedWalls);
+                _graph = new Graph(_board);
+            }
             Wall wall = new Wall(orientation, x, y);
+            _placedWalls.Add(wall);
             _graph.AddBoundary(wall);
             if (!isAi && _graph.GetMinimumDistanceToY(_board.GetPawnLocation(0), 0) == -1 ||
                 _graph.GetMinimumDistanceToY(_board.GetPawnLocation(1), BoardSize - 1) == -1)

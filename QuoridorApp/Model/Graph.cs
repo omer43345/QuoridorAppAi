@@ -13,6 +13,7 @@ public class Node
     private bool _isVisited;
     private Node _parent;
     private int _distance;
+    private Node _removedNeighbor;
 
     public Node(Point point)
     {
@@ -27,12 +28,36 @@ public class Node
     {
         _neighbors.Add(node);
     }
-
-    public void RemoveNeighbor(Node node)
+    
+    public void RemoveNeighbor(string side)
     {
-        _neighbors.Remove(node);
+        Node leftNeighbor = null;
+        Node rightNeighbor = null;
+        Node upNeighbor = null;
+        Node downNeighbor = null;
+        foreach (var neighbor in _neighbors)
+        {
+            leftNeighbor =neighbor._point.X<this._point.X?neighbor:leftNeighbor;
+            rightNeighbor =neighbor._point.X>this._point.X?neighbor:rightNeighbor;
+            upNeighbor =neighbor._point.Y<this._point.Y?neighbor:upNeighbor;
+            downNeighbor =neighbor._point.Y>this._point.Y?neighbor:downNeighbor;
+        }
+        if (side == "Left")
+            _removedNeighbor = leftNeighbor;
+        else if (side == "Right")
+            _removedNeighbor = rightNeighbor;
+        else if (side == "Up")
+            _removedNeighbor = upNeighbor;
+        else if (side == "Down")
+            _removedNeighbor = downNeighbor;
+        _neighbors.Remove(_removedNeighbor);
     }
-
+    public void AddRemovedNeighbor()
+    {
+        Node nodeToAdd = _removedNeighbor;
+        _neighbors.Add(nodeToAdd);
+        _removedNeighbor = null;
+    }
     public List<Node> GetNeighbors()
     {
         return _neighbors;
@@ -63,6 +88,8 @@ public class Node
     {
         _isVisited = false;
     }
+
+
 }
 
 // class that creating the graph of the board and contains some graph algorithms
@@ -164,24 +191,15 @@ public class Graph
     {
         int x = wall.X;
         int y = wall.Y;
-        bool orientation = wall.Orientation;
-        Dictionary<Node, Node> neighborsToAdd = new Dictionary<Node, Node>();
-        if (orientation)
+        List<Node> neighborsToAdd = new List<Node>();
+        neighborsToAdd.Add(_nodes[x + y * BoardSize]);
+        neighborsToAdd.Add(_nodes[x + 1 + y * BoardSize]);
+        neighborsToAdd.Add(_nodes[x + (y + 1) * BoardSize]);
+        neighborsToAdd.Add(_nodes[x + 1 + (y + 1) * BoardSize]);
+        foreach (var node in neighborsToAdd)
         {
-            neighborsToAdd.Add(_nodes[x + y * BoardSize], _nodes[x + 1 + y * BoardSize]);
-            neighborsToAdd.Add(_nodes[x + 1 + y * BoardSize], _nodes[x + y * BoardSize]);
-            neighborsToAdd.Add(_nodes[x + (y + 1) * BoardSize], _nodes[x + 1 + (y + 1) * BoardSize]);
-            neighborsToAdd.Add(_nodes[x + 1 + (y + 1) * BoardSize], _nodes[x + (y + 1) * BoardSize]);
+            node.AddRemovedNeighbor();
         }
-        else
-        {
-            neighborsToAdd.Add(_nodes[x + y * BoardSize], _nodes[x + (y + 1) * BoardSize]);
-            neighborsToAdd.Add(_nodes[x + 1 + y * BoardSize], _nodes[x + 1 + (y + 1) * BoardSize]);
-            neighborsToAdd.Add(_nodes[x + (y + 1) * BoardSize], _nodes[x + y * BoardSize]);
-            neighborsToAdd.Add(_nodes[x + 1 + (y + 1) * BoardSize], _nodes[x + 1 + y * BoardSize]);
-        }
-
-        AddOrRemoveNeighbors(neighborsToAdd);
     }
 
     public void AddBoundary(Wall wall)
@@ -189,40 +207,24 @@ public class Graph
         int x = wall.X;
         int y = wall.Y;
         bool orientation = wall.Orientation;
-        Dictionary<Node, Node> neighborsToRemove = new Dictionary<Node, Node>();
+        Dictionary<Node, string> neighborsToRemove = new Dictionary<Node, string>();
         if (orientation)
         {
-            neighborsToRemove.Add(_nodes[x + y * BoardSize], _nodes[x + 1 + y * BoardSize]);
-            neighborsToRemove.Add(_nodes[x + 1 + y * BoardSize], _nodes[x + y * BoardSize]);
-            neighborsToRemove.Add(_nodes[x + (y + 1) * BoardSize], _nodes[x + 1 + (y + 1) * BoardSize]);
-            neighborsToRemove.Add(_nodes[x + 1 + (y + 1) * BoardSize], _nodes[x + (y + 1) * BoardSize]);
+            neighborsToRemove.Add(_nodes[x + y * BoardSize], "Right");
+            neighborsToRemove.Add(_nodes[x + 1 + y * BoardSize], "Left");
+            neighborsToRemove.Add(_nodes[x + (y + 1) * BoardSize], "Right");
+            neighborsToRemove.Add(_nodes[x + 1 + (y + 1) * BoardSize], "Left");
         }
         else
         {
-            neighborsToRemove.Add(_nodes[x + y * BoardSize], _nodes[x + (y + 1) * BoardSize]);
-            neighborsToRemove.Add(_nodes[x + 1 + y * BoardSize], _nodes[x + 1 + (y + 1) * BoardSize]);
-            neighborsToRemove.Add(_nodes[x + (y + 1) * BoardSize], _nodes[x + y * BoardSize]);
-            neighborsToRemove.Add(_nodes[x + 1 + (y + 1) * BoardSize], _nodes[x + 1 + y * BoardSize]);
+            neighborsToRemove.Add(_nodes[x + y * BoardSize], "Down");
+            neighborsToRemove.Add(_nodes[x + 1 + y * BoardSize], "Down");
+            neighborsToRemove.Add(_nodes[x + (y + 1) * BoardSize], "Up");
+            neighborsToRemove.Add(_nodes[x + 1 + (y + 1) * BoardSize], "Up");
         }
-
-        AddOrRemoveNeighbors(neighborsToRemove, false);
+        foreach (KeyValuePair<Node, string> pair in neighborsToRemove)
+            pair.Key.RemoveNeighbor(pair.Value);
     }
 
-    private void AddOrRemoveNeighbors(Dictionary<Node, Node> neighborsToRemove, bool add = true)
-    {
-        if (add)
-        {
-            foreach (KeyValuePair<Node, Node> pair in neighborsToRemove)
-            {
-                pair.Key.AddNeighbor(pair.Value);
-            }
-        }
-        else
-        {
-            foreach (KeyValuePair<Node, Node> pair in neighborsToRemove)
-            {
-                pair.Key.RemoveNeighbor(pair.Value);
-            }
-        }
-    }
+
 }
