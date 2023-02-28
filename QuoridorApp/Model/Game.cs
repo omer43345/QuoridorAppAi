@@ -11,27 +11,26 @@ namespace QuoridorApp.Model
     public class Game
     {
         private static Game _instance;
-        private static Dictionary<int, Wall> _allowedWalls;
-        private static int _turn; // 0 = user, 1 = computer
-        private GameFormController _gameFormController = GameFormController.GetInstance();
-        private static Board _board;
-        private static Graph _graph;
-        private static Ai _ai;
-        private static List<Wall> _placedWalls;
+        private Dictionary<int, Wall> _allowedWalls;
+        private int _turn;
+        private readonly GameFormController _gameFormController = GameFormController.GetInstance();
+        private Board _board;
+        private Graph _graph;
+        private Ai _ai;
+        private List<Wall> _placedWalls;
+        private Dictionary<int, Wall> _removedWalls;
+        private Move _lastMove;
+
 
         public static Game GetInstance()
         {
-            if (_instance == null)
-            {
-                _instance = new Game();
-                InitializeGame();
-            }
-
-            return _instance;
+            return _instance ??= new Game();
         }
 
-        private static void InitializeGame()
+        public void InitializeGame()
         {
+            _removedWalls = new Dictionary<int, Wall>();
+            _lastMove = null;
             _placedWalls = new List<Wall>();
             _allowedWalls = new Dictionary<int, Wall>();
             _board = new Board();
@@ -50,41 +49,24 @@ namespace QuoridorApp.Model
                 _allowedWalls.Add(i, new Wall(orientation, x, y));
             }
 
-            _turn = 0;
+            _turn = UserInd;
         }
 
-        public void MovePawn(Point newLocation, bool isAi = false)
+        private void MovePawn(Point newLocation)
         {
-            if (_board.GetIfSpecialMove())
-            {
-                _board.RemoveSpecialMovePoints(_placedWalls);
-                _graph = new Graph(_board);
-            }
             _board.MovePawn(_turn, newLocation);
-            if ((newLocation.Y == 0 && _turn == 0) || (newLocation.Y == BoardSize - 1 && _turn == 1))
-                _gameFormController.GameOver(_turn == 0 ? WinnerMessage : LoserMessage);
-            if (_board.GetIfSpecialMove())
-            {
-                _graph = new Graph(_board);
-            }
-            ChangeTurn();
-            if (!isAi)
-                MakeAiMove();
+            if ((newLocation.Y == ComputerPawnStartingPoint.Y && _turn == UserInd) ||
+                (newLocation.Y == UserPawnStartingPoint.Y && _turn == AiInd))
+                _gameFormController.GameOver(_turn == UserInd ? WinnerMessage : LoserMessage);
         }
-        
 
-        public bool PlaceWall(int x, int y, bool orientation, bool isAi = false)
+
+        private bool PlaceWall(Wall wall)
         {
-            if (_board.GetIfSpecialMove())
-            {
-                _board.RemoveSpecialMovePoints(_placedWalls);
-                _graph = new Graph(_board);
-            }
-            Wall wall = new Wall(orientation, x, y);
             _placedWalls.Add(wall);
             _graph.AddBoundary(wall);
-            if (!isAi && _graph.GetMinimumDistanceToY(_board.GetPawnLocation(0), 0) == -1 ||
-                _graph.GetMinimumDistanceToY(_board.GetPawnLocation(1), BoardSize - 1) == -1)
+            if (_graph.GetMinimumDistanceToY(_board.GetPawnLocation(UserInd), ComputerPawnStartingPoint.Y) == -1 ||
+                _graph.GetMinimumDistanceToY(_board.GetPawnLocation(AiInd), UserPawnStartingPoint.Y) == -1)
             {
                 _graph.RemoveBoundary(wall);
                 return false;
@@ -92,21 +74,65 @@ namespace QuoridorApp.Model
 
             UpdateWallList(wall);
             _board.PlaceWall(_turn, wall);
-            ChangeTurn();
-            if (!isAi)
-                MakeAiMove();
+            _lastMove = new Move(wall);
             return true;
         }
 
-        private void MakeAiMove()
+        public bool MakeMove(Move move, bool isAi = false)
         {
-            _ai = new Ai(_graph);
-            AiMove move = _ai.GetAiMove();
-            _gameFormController.UpdateBoard(move);
+            if (isAi)
+                _gameFormController.UpdateBoard(move);
+            bool doneSuccessfully = true;
+            if (_board.GetIfSpecialMove())
+            {
+                _board.RemoveSpecialMovePoints(_placedWalls);
+                _graph = new Graph(_board);
+            }
+
             if (move.GetMoveType())
-                PlaceWall(move.GetWallToPlace().X, move.GetWallToPlace().Y, move.GetWallToPlace().Orientation, true);
+                doneSuccessfully = PlaceWall(move.GetWallToPlace());
             else
-                MovePawn(move.GetPointToMove(), true);
+                MovePawn(move.GetPointToMove());
+            if (!doneSuccessfully)
+                return false;
+            if (_board.GetIfSpecialMove())
+                _graph = new Graph(_board);
+            ChangeTurn();
+            if (!isAi)
+            {
+                _ai = new Ai();
+                move = _ai.GetAiMove();
+                MakeMove(move, true);
+            }
+
+            return true;
+        }
+
+        public bool MakeAiMove(Move move)
+        {
+            bool doneSuccessfully = true;
+            if (_board.GetIfSpecialMove())
+            {
+                _board.RemoveSpecialMovePoints(_placedWalls);
+                _graph = new Graph(_board);
+            }
+
+            if (move.GetMoveType())
+                doneSuccessfully = PlaceWall(move.GetWallToPlace());
+            else
+                MoveAiPawn(move.GetPointToMove());
+            if (!doneSuccessfully)
+                return false;
+
+            if (_board.GetIfSpecialMove())
+                _graph = new Graph(_board);
+            return true;
+        }
+
+        private void MoveAiPawn(Point getPointToMove)
+        {
+            _lastMove = new Move(_board.GetPawnLocation(AiInd));
+            _board.MovePawn(_turn, getPointToMove);
         }
 
         public bool CanPlaceWall()
@@ -120,10 +146,10 @@ namespace QuoridorApp.Model
             int y = square.Y;
             Dictionary<string, Point> possibleSquares = new Dictionary<string, Point>
             {
-                { "down", new Point(x, y + 1) },
-                { "left", new Point(x - 1, y) },
-                { "right", new Point(x + 1, y) },
-                { "up", new Point(x, y - 1) }
+                { Down, new Point(x, y + 1) },
+                { Up, new Point(x, y - 1) },
+                { Left, new Point(x - 1, y) },
+                { Right, new Point(x + 1, y) }
             };
             BoundariesCheck(possibleSquares);
             return possibleSquares.Values.ToList();
@@ -144,28 +170,28 @@ namespace QuoridorApp.Model
         {
             foreach (var wall in _allowedWalls)
             {
-                if (wall.Value.Orientation == placedWall.Orientation)
+                if (placedWall.Equals(wall.Value))
                 {
-                    int wallX = placedWall.Orientation
-                        ? wall.Key / WallsPerRowAndColumn
-                        : (wall.Key - NumberOfWallsInTheBoard / 2) % WallsPerRowAndColumn;
-                    int wallY = placedWall.Orientation
-                        ? wall.Key % WallsPerRowAndColumn
-                        : (wall.Key - NumberOfWallsInTheBoard / 2) / WallsPerRowAndColumn;
-                    if (wallX == placedWall.X && wallY == placedWall.Y)
-                    {
-                        int i = wall.Key;
-                        _allowedWalls.Remove(i);
-                        int index = placedWall.Orientation
-                            ? wallY * WallsPerRowAndColumn + wallX + (NumberOfWallsInTheBoard / 2)
-                            : wallY + wallX * WallsPerRowAndColumn;
-                        _allowedWalls.Remove(index);
-                        if ((i % WallsPerRowAndColumn) > 0)
-                            _allowedWalls.Remove(i - 1);
-                        if ((i % WallsPerRowAndColumn) != WallsPerRowAndColumn - 1)
-                            _allowedWalls.Remove(i + 1);
-                        break;
-                    }
+                    _removedWalls.Add(wall.Key, wall.Value);
+
+                    int index = placedWall.Orientation
+                        ? placedWall.Y * WallsPerRowAndColumn + placedWall.X + (NumberOfWallsInTheBoard / 2)
+                        : placedWall.Y + placedWall.X * WallsPerRowAndColumn;
+
+                    if (_allowedWalls.ContainsKey(index))
+                        _removedWalls.Add(index, _allowedWalls[index]);
+
+                    if (_allowedWalls.ContainsKey(wall.Key - 1))
+                        _removedWalls.Add(wall.Key - 1, _allowedWalls[wall.Key - 1]);
+
+                    if (_allowedWalls.ContainsKey(wall.Key + 1))
+                        _removedWalls.Add(wall.Key + 1, _allowedWalls[wall.Key + 1]);
+
+                    _allowedWalls.Remove(wall.Key);
+                    _allowedWalls.Remove(wall.Key - 1);
+                    _allowedWalls.Remove(wall.Key + 1);
+                    _allowedWalls.Remove(index);
+                    break;
                 }
             }
         }
@@ -193,7 +219,7 @@ namespace QuoridorApp.Model
 
         public bool UserTurn()
         {
-            return _turn == 0;
+            return _turn == UserInd;
         }
 
         public int GetWallsCounter()
@@ -208,17 +234,99 @@ namespace QuoridorApp.Model
 
         private void ChangeTurn()
         {
-            _turn = _turn == 0 ? 1 : 0;
-        }
-
-        public Dictionary<int, Wall> GetAllowedWalls()
-        {
-            return _allowedWalls;
+            _turn = _turn == UserInd ? AiInd : UserInd;
         }
 
         public Board GetBoard()
         {
             return _board;
+        }
+
+        public Game CopyState()
+        {
+            // Create a new instance of the Game class
+            Game copy = new Game
+            {
+                // Copy the state of the instance variables
+                _turn = _turn,
+                _board = new Board(),
+                _removedWalls = new Dictionary<int, Wall>()
+            };
+
+            copy._board.MakeTheSameStates(_board);
+            copy._graph = new Graph(copy._board);
+
+            // Create a new dictionary and copy the allowed walls
+            copy._allowedWalls = new Dictionary<int, Wall>();
+            foreach (KeyValuePair<int, Wall> kvp in _allowedWalls)
+            {
+                copy._allowedWalls.Add(kvp.Key, kvp.Value);
+            }
+
+            copy._placedWalls = new List<Wall>();
+            foreach (Wall wall in _placedWalls)
+            {
+                copy._placedWalls.Add(wall);
+            }
+
+            return copy;
+        }
+
+
+        public IEnumerable<Move> GetPossibleMoves()
+        {
+            List<Move> moves = new List<Move>();
+            foreach (var point in GetAllowedMoves())
+            {
+                moves.Add(new Move(point));
+            }
+
+            if (CanPlaceWall())
+            {
+                foreach (var wall in _allowedWalls)
+                {
+                    moves.Add(new Move(new Wall(wall.Value.Orientation, wall.Value.X, wall.Value.Y)));
+                }
+            }
+
+            return moves;
+        }
+
+        public void UndoLastMove()
+        {
+            if (_board.GetIfSpecialMove())
+            {
+                _board.RemoveSpecialMovePoints(_placedWalls);
+                _graph = new Graph(_board);
+            }
+
+            if (_lastMove != null)
+            {
+                if (_lastMove.GetMoveType())
+                {
+                    _placedWalls.Remove(_lastMove.GetWallToPlace());
+                    _board.RemoveSpecialMovePoints(_placedWalls);
+                    _board.AddToWallCount(_turn);
+                    _graph = new Graph(_board);
+                    foreach (var wall in _removedWalls)
+                    {
+                        _allowedWalls.Add(wall.Key, wall.Value);
+                    }
+
+                    _removedWalls.Clear();
+                }
+                else
+                {
+                    _board.MovePawn(_turn, _lastMove.GetPointToMove());
+                }
+
+                _lastMove = null;
+            }
+        }
+
+        public Graph GetGraph()
+        {
+            return _graph;
         }
     }
 }

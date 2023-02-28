@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
-using QuoridorApp.Controller;
 using static QuoridorApp.Constants;
 
 namespace QuoridorApp.Model;
 
 public class Board
 {
-    private readonly Pawn[] _pawns;
+    private Pawn[] _pawns;
 
-    private readonly List<Point>[,] _board; // Two dimensional array that representing the board when every square has a list of points that can be reached from it
+    private List<Point>[,]
+        _board; // Two dimensional array that representing the board when every square has a list of points that can be reached from it
+
     private bool _specialMove; // boolean that indicates if the last move was a special move 
     private readonly Game _game;
 
@@ -19,8 +19,8 @@ public class Board
     {
         _specialMove = false;
         _pawns = new Pawn[2];
-        _pawns[0] = new Pawn(UserPawnStartingPoint);
-        _pawns[1] = new Pawn(ComputerPawnStartingPoint);
+        _pawns[UserInd] = new Pawn(UserPawnStartingPoint);
+        _pawns[AiInd] = new Pawn(ComputerPawnStartingPoint);
         _board = new List<Point>[BoardSize, BoardSize];
         _game = Game.GetInstance();
         InitBoard();
@@ -41,11 +41,7 @@ public class Board
     {
         _pawns[turn].PlaceWall();
         UpdateBoard(wall);
-        if (_board[_pawns[0].Location.Y,_pawns[0].Location.X].Contains(_pawns[1].Location))
-        {
-            TakeCareOfSpecialMove();
-            _specialMove = true;
-        }
+        CheckSpecialMove();
     }
 
 
@@ -75,7 +71,12 @@ public class Board
     public void MovePawn(int turn, Point newLocation)
     {
         _pawns[turn].SetLocation(newLocation);
-        if (_board[_pawns[0].Location.Y,_pawns[0].Location.X].Contains(_pawns[1].Location))
+        CheckSpecialMove();
+    }
+
+    private void CheckSpecialMove()
+    {
+        if (_board[_pawns[UserInd].Location.Y, _pawns[UserInd].Location.X].Contains(_pawns[AiInd].Location))
         {
             TakeCareOfSpecialMove();
             _specialMove = true;
@@ -106,43 +107,52 @@ public class Board
                 _board[i, j] = new List<Point>();
             }
         }
+
         AddStartingPoints();
     }
 
 
     private void TakeCareOfSpecialMove()
     {
-        int pawn1 = 0, pawn2 = 1;
+        int pawn1 = UserInd, pawn2 = AiInd;
         _board[_pawns[pawn1].Location.Y, _pawns[pawn1].Location.X].Remove(_pawns[pawn2].Location);
         _board[_pawns[pawn2].Location.Y, _pawns[pawn2].Location.X].Remove(_pawns[pawn1].Location);
-        pawn1 = _pawns[pawn1].Location.Y > _pawns[pawn2].Location.Y || _pawns[pawn1].Location.X > _pawns[pawn2].Location.X ? pawn1 : pawn2;
-        pawn2 = pawn1 == 0 ? 1 : 0;
+        pawn1 = _pawns[pawn1].Location.Y > _pawns[pawn2].Location.Y ||
+                _pawns[pawn1].Location.X > _pawns[pawn2].Location.X
+            ? pawn1
+            : pawn2;
+        pawn2 = pawn1 == UserInd ? AiInd : UserInd;
         bool yCase = _pawns[pawn1].Location.X == _pawns[pawn2].Location.X;
-        AddSpecialPoints(yCase,pawn1,pawn2,true);
-        AddSpecialPoints(yCase,pawn2,pawn1,false);
+        AddSpecialPoints(yCase, pawn1, pawn2, true);
+        AddSpecialPoints(yCase, pawn2, pawn1, false);
     }
 
-    private void AddSpecialPoints(bool yCase, int pawn1, int pawn2,bool above)
+    private void AddSpecialPoints(bool yCase, int pawn1, int pawn2, bool above)
     {
-        int addWhenAboveY = above?1:-1;
+        int addWhenAboveY = above ? 1 : -1;
         addWhenAboveY = yCase ? addWhenAboveY : 0;
-        int addWhenAboveX = above?1:-1;
+        int addWhenAboveX = above ? 1 : -1;
         addWhenAboveX = !yCase ? addWhenAboveX : 0;
         int addWhenYCase = yCase ? 1 : 0;
         int addWhenXCase = !yCase ? 1 : 0;
         if (_board[_pawns[pawn1].Location.Y, _pawns[pawn1].Location.X]
             .Contains(new Point(_pawns[pawn1].Location.X + addWhenAboveX, _pawns[pawn1].Location.Y + addWhenAboveY)))
         {
-            _board[_pawns[pawn2].Location.Y, _pawns[pawn2].Location.X].Add(new Point(_pawns[pawn1].Location.X+addWhenAboveX, _pawns[pawn1].Location.Y + addWhenAboveY));
+            _board[_pawns[pawn2].Location.Y, _pawns[pawn2].Location.X].Add(
+                new Point(_pawns[pawn1].Location.X + addWhenAboveX, _pawns[pawn1].Location.Y + addWhenAboveY));
             return;
         }
-        if(_board[_pawns[pawn1].Location.Y, _pawns[pawn1].Location.X]
-                .Contains(new Point(_pawns[pawn1].Location.X-addWhenYCase, _pawns[pawn1].Location.Y-addWhenXCase)))
-            _board[_pawns[pawn2].Location.Y, _pawns[pawn2].Location.X].Add(new Point(_pawns[pawn1].Location.X-addWhenYCase, _pawns[pawn1].Location.Y-addWhenXCase));
-        if(_board[_pawns[pawn1].Location.Y, _pawns[pawn1].Location.X]
-                .Contains(new Point(_pawns[pawn1].Location.X+addWhenYCase, _pawns[pawn1].Location.Y+addWhenXCase)))
-            _board[_pawns[pawn2].Location.Y, _pawns[pawn2].Location.X].Add(new Point(_pawns[pawn1].Location.X+addWhenYCase, _pawns[pawn1].Location.Y+addWhenXCase));
+
+        if (_board[_pawns[pawn1].Location.Y, _pawns[pawn1].Location.X]
+            .Contains(new Point(_pawns[pawn1].Location.X - addWhenYCase, _pawns[pawn1].Location.Y - addWhenXCase)))
+            _board[_pawns[pawn2].Location.Y, _pawns[pawn2].Location.X].Add(
+                new Point(_pawns[pawn1].Location.X - addWhenYCase, _pawns[pawn1].Location.Y - addWhenXCase));
+        if (_board[_pawns[pawn1].Location.Y, _pawns[pawn1].Location.X]
+            .Contains(new Point(_pawns[pawn1].Location.X + addWhenYCase, _pawns[pawn1].Location.Y + addWhenXCase)))
+            _board[_pawns[pawn2].Location.Y, _pawns[pawn2].Location.X].Add(
+                new Point(_pawns[pawn1].Location.X + addWhenYCase, _pawns[pawn1].Location.Y + addWhenXCase));
     }
+
     public int GetWallCount(int turn)
     {
         return _pawns[turn].GetWallCount();
@@ -172,8 +182,23 @@ public class Board
         return boardCopy;
     }
 
+    public void MakeTheSameStates(Board board)
+    {
+        this._board = board.GetBoardCopy();
+        this._pawns[UserInd].Location = new Point(board.GetPawnLocation(UserInd).X, board.GetPawnLocation(UserInd).Y);
+        this._pawns[AiInd].Location = new Point(board.GetPawnLocation(AiInd).X, board.GetPawnLocation(AiInd).Y);
+        this._pawns[UserInd].SetWallCount(board.GetWallCount(UserInd));
+        this._pawns[AiInd].SetWallCount(board.GetWallCount(AiInd));
+    }
+
+
     public Point GetPawnLocation(int turn)
     {
         return _pawns[turn].Location;
+    }
+
+    public void AddToWallCount(int turn)
+    {
+        _pawns[turn].AddWall();
     }
 }

@@ -26,6 +26,7 @@ public class GameFormController
     {
         _gameForm = gameForm;
         _game = Game.GetInstance();
+        _game.InitializeGame();
     }
 
     public void GameOver(string message)
@@ -40,12 +41,14 @@ public class GameFormController
 
     public void MovePawn(int x, int y)
     {
-        _game.MovePawn(new Point(x, y));
+        Move move = new Move(new Point(x, y));
+        _game.MakeMove(move);
     }
 
     public bool PlaceWall(int x, int y, bool orientation)
     {
-        return _game.PlaceWall(x, y, orientation);
+        Move move = new Move(new Wall(orientation, x, y));
+        return _game.MakeMove(move);
     }
 
     public int[] GetAllowedWallsIndexes()
@@ -73,16 +76,16 @@ public class GameFormController
         return _game.GetWallsCounter();
     }
 
-    public void UpdateBoard(AiMove aiMove)
+    public void UpdateBoard(Move move)
     {
-        if (aiMove.GetMoveType())
+        if (move.GetMoveType())
         {
-            _gameForm.PlaceComputerWall(aiMove.GetWallToPlace().X, aiMove.GetWallToPlace().Y,
-                aiMove.GetWallToPlace().Orientation);
+            _gameForm.PlaceComputerWall(move.GetWallToPlace().X, move.GetWallToPlace().Y,
+                move.GetWallToPlace().Orientation);
         }
         else
         {
-            _gameForm.MoveComputerPawn(aiMove.GetPointToMove());
+            _gameForm.MoveComputerPawn(move.GetPointToMove());
         }
     }
 }

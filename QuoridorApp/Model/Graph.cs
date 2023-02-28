@@ -28,7 +28,7 @@ public class Node
     {
         _neighbors.Add(node);
     }
-    
+
     public void RemoveNeighbor(string side)
     {
         Node leftNeighbor = null;
@@ -37,27 +37,30 @@ public class Node
         Node downNeighbor = null;
         foreach (var neighbor in _neighbors)
         {
-            leftNeighbor =neighbor._point.X<this._point.X?neighbor:leftNeighbor;
-            rightNeighbor =neighbor._point.X>this._point.X?neighbor:rightNeighbor;
-            upNeighbor =neighbor._point.Y<this._point.Y?neighbor:upNeighbor;
-            downNeighbor =neighbor._point.Y>this._point.Y?neighbor:downNeighbor;
+            leftNeighbor = neighbor._point.X < this._point.X ? neighbor : leftNeighbor;
+            rightNeighbor = neighbor._point.X > this._point.X ? neighbor : rightNeighbor;
+            upNeighbor = neighbor._point.Y < this._point.Y ? neighbor : upNeighbor;
+            downNeighbor = neighbor._point.Y > this._point.Y ? neighbor : downNeighbor;
         }
-        if (side == "Left")
+
+        if (side == Left)
             _removedNeighbor = leftNeighbor;
-        else if (side == "Right")
+        else if (side == Right)
             _removedNeighbor = rightNeighbor;
-        else if (side == "Up")
+        else if (side == Up)
             _removedNeighbor = upNeighbor;
-        else if (side == "Down")
+        else if (side == Down)
             _removedNeighbor = downNeighbor;
         _neighbors.Remove(_removedNeighbor);
     }
+
     public void AddRemovedNeighbor()
     {
         Node nodeToAdd = _removedNeighbor;
         _neighbors.Add(nodeToAdd);
         _removedNeighbor = null;
     }
+
     public List<Node> GetNeighbors()
     {
         return _neighbors;
@@ -88,8 +91,6 @@ public class Node
     {
         _isVisited = false;
     }
-
-
 }
 
 // class that creating the graph of the board and contains some graph algorithms
@@ -189,42 +190,27 @@ public class Graph
 
     public void RemoveBoundary(Wall wall)
     {
-        int x = wall.X;
-        int y = wall.Y;
-        List<Node> neighborsToAdd = new List<Node>();
-        neighborsToAdd.Add(_nodes[x + y * BoardSize]);
-        neighborsToAdd.Add(_nodes[x + 1 + y * BoardSize]);
-        neighborsToAdd.Add(_nodes[x + (y + 1) * BoardSize]);
-        neighborsToAdd.Add(_nodes[x + 1 + (y + 1) * BoardSize]);
-        foreach (var node in neighborsToAdd)
-        {
-            node.AddRemovedNeighbor();
-        }
+        _nodes[wall.X + wall.Y * BoardSize].AddRemovedNeighbor();
+        _nodes[wall.X + 1 + wall.Y * BoardSize].AddRemovedNeighbor();
+        _nodes[wall.X + (wall.Y + 1) * BoardSize].AddRemovedNeighbor();
+        _nodes[wall.X + 1 + (wall.Y + 1) * BoardSize].AddRemovedNeighbor();
     }
 
     public void AddBoundary(Wall wall)
     {
-        int x = wall.X;
-        int y = wall.Y;
-        bool orientation = wall.Orientation;
-        Dictionary<Node, string> neighborsToRemove = new Dictionary<Node, string>();
-        if (orientation)
+        if (wall.Orientation)
         {
-            neighborsToRemove.Add(_nodes[x + y * BoardSize], "Right");
-            neighborsToRemove.Add(_nodes[x + 1 + y * BoardSize], "Left");
-            neighborsToRemove.Add(_nodes[x + (y + 1) * BoardSize], "Right");
-            neighborsToRemove.Add(_nodes[x + 1 + (y + 1) * BoardSize], "Left");
+            _nodes[wall.X + wall.Y * BoardSize].RemoveNeighbor(Right);
+            _nodes[wall.X + 1 + wall.Y * BoardSize].RemoveNeighbor(Left);
+            _nodes[wall.X + (wall.Y + 1) * BoardSize].RemoveNeighbor(Right);
+            _nodes[wall.X + 1 + (wall.Y + 1) * BoardSize].RemoveNeighbor(Left);
         }
         else
         {
-            neighborsToRemove.Add(_nodes[x + y * BoardSize], "Down");
-            neighborsToRemove.Add(_nodes[x + 1 + y * BoardSize], "Down");
-            neighborsToRemove.Add(_nodes[x + (y + 1) * BoardSize], "Up");
-            neighborsToRemove.Add(_nodes[x + 1 + (y + 1) * BoardSize], "Up");
+            _nodes[wall.X + wall.Y * BoardSize].RemoveNeighbor(Down);
+            _nodes[wall.X + 1 + wall.Y * BoardSize].RemoveNeighbor(Down);
+            _nodes[wall.X + (wall.Y + 1) * BoardSize].RemoveNeighbor(Up);
+            _nodes[wall.X + 1 + (wall.Y + 1) * BoardSize].RemoveNeighbor(Up);
         }
-        foreach (KeyValuePair<Node, string> pair in neighborsToRemove)
-            pair.Key.RemoveNeighbor(pair.Value);
     }
-
-
 }

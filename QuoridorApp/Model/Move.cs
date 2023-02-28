@@ -2,14 +2,14 @@
 
 namespace QuoridorApp.Model;
 
-// class that representing the ai chosen move, contains wall to place or point to move to
-public class AiMove
+// class that representing the chosen move, contains wall to place or point to move to
+public class Move
 {
     private Point _pointToMove; // point to move to
     private Wall _wallToPlace; // wall to place
     private bool _moveType; // true if wall to place, false if point to move
 
-    public AiMove(Wall wall)
+    public Move(Wall wall)
     {
         _wallToPlace = wall;
         _pointToMove = new Point(-1, -1);
@@ -17,7 +17,7 @@ public class AiMove
     }
 
 
-    public AiMove(Point point)
+    public Move(Point point)
     {
         _pointToMove = point;
         _wallToPlace = null;

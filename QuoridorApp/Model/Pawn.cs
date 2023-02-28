@@ -29,7 +29,16 @@ namespace QuoridorApp.Model
         {
             return _wallCount;
         }
-        
-        
+
+
+        public void AddWall()
+        {
+            _wallCount++;
+        }
+
+        public void SetWallCount(int wallCount)
+        {
+            _wallCount = wallCount;
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using static QuoridorApp.Constants;
 
 namespace QuoridorApp.Model;
@@ -7,62 +6,52 @@ namespace QuoridorApp.Model;
 // class that represents the AI of the game and contains the logic of the AI.
 public class Ai
 {
-    private Graph _graph; // graph of the game
-    private Game _game; // game instance
-    private AiMove _aiMove;
+    private readonly Game _game; // game copy
 
-    public Ai(Graph graph)
+    public Ai()
     {
-        _graph = graph;
-        _game = Game.GetInstance();
-        EvaluateMove();
+        _game = Game.GetInstance().CopyState(); // copy the game state
     }
 
-    public AiMove GetAiMove()
+    public Move GetAiMove()
     {
-        return _aiMove;
-    }
-
-    private void EvaluateMove()
-    {
-        Dictionary<int, Wall> allowedWalls = _game.GetAllowedWalls();
-        List<Point> allowedMoves = _game.GetAllowedMoves();
-        int userPathToWin = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(0), 0) ;
-        int aiPathToWin = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(1), BoardSize - 1);
-        int maxDifference = userPathToWin - aiPathToWin;
-        
-        foreach (var move in allowedMoves)
+        double bestEval = int.MinValue;
+        Move bestMove = null;
+        IEnumerable<Move> possibleMoves = _game.GetPossibleMoves();
+        foreach (Move move in possibleMoves)
         {
-            aiPathToWin  = _graph.GetMinimumDistanceToY(move, BoardSize - 1);
-            if (userPathToWin - aiPathToWin > maxDifference)
+            if (_game.MakeAiMove(move))
             {
-                maxDifference = userPathToWin - aiPathToWin;
-                _aiMove = new AiMove(move);
-            }
-        }
-        int userWallCount = _game.GetBoard().GetWallCount(0);
-        int aiWallCount = _game.GetBoard().GetWallCount(1)-1;
-        if (aiWallCount >= 0 && aiPathToWin > userPathToWin)
-        {
-            foreach (var wall in allowedWalls)
-            {
-                _graph.AddBoundary(wall.Value);
-                int userPath = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(0), 0);
-                int aiPath = _graph.GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(1), BoardSize - 1);
-                if (userPath != -1 && aiPath != -1)
+                double eval = EvaluateMove();
+                if (eval >= bestEval)
                 {
-                    userPathToWin = userPath + aiWallCount;
-                    aiPathToWin = aiPath + userWallCount;
-                    if (userPathToWin - aiPathToWin > maxDifference)
-                    {
-                        maxDifference = userPathToWin - aiPathToWin;
-                        _aiMove = new AiMove(wall.Value);
-                    }
+                    bestEval = eval;
+                    bestMove = move;
                 }
-
-                _graph.RemoveBoundary(wall.Value);
             }
+
+            _game.UndoLastMove();
         }
+
+        return bestMove;
+    }
+
+    private double EvaluateMove()
+    {
+        int userPathToWin = _game.GetGraph()
+            .GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(UserInd), ComputerPawnStartingPoint.Y);
+        int aiPathToWin = _game.GetGraph()
+            .GetMinimumDistanceToY(_game.GetBoard().GetPawnLocation(AiInd), UserPawnStartingPoint.Y);
+        int userWalls = _game.GetBoard().GetWallCount(UserInd);
+        int aiWalls = _game.GetBoard().GetWallCount(AiInd);
+
+        double aiEval = userWalls < aiWalls
+            ? aiPathToWin * ShortestPathWeight
+            : aiPathToWin * ShortestPathWeight + userWalls * NumberOfWallsWeight;
+        double userEval = userWalls < aiWalls
+            ? userPathToWin * ShortestPathWeight
+            : userPathToWin * ShortestPathWeight + aiWalls * NumberOfWallsWeight;
+
+        return userEval - aiEval;
     }
 }
-

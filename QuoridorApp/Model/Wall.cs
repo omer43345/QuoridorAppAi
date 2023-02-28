@@ -13,5 +13,10 @@
             X = x;
             Y = y;
         }
+
+        public bool Equals(Wall wall)
+        {
+            return wall.X == X && wall.Y == Y && wall.Orientation == Orientation;
+        }
     }
 }
