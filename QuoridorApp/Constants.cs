@@ -20,6 +20,7 @@ public static class Constants
     public const string Left = "left";
     public const string Up = "up";
     public const string Down = "down";
-    public const double NumberOfWallsWeight = 4; // Weight of the number of walls in the evaluation function
-    public const double ShortestPathWeight = 1; // Weight of the shortest path in the evaluation function
+    public const double NumberOfWallsWeight = 1.3; // Weight of the number of walls in the evaluation function
+    public const double ShortestPathWeight = 1.2; // Weight of the shortest path in the evaluation function
+    public const double PathCountWeight = 0.3; // Weight of the number of paths in the evaluation function
 }

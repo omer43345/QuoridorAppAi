@@ -18,8 +18,6 @@ namespace QuoridorApp.Model
         private Graph _graph;
         private Ai _ai;
         private List<Wall> _placedWalls;
-        private Dictionary<int, Wall> _removedWalls;
-        private Move _lastMove;
 
 
         public static Game GetInstance()
@@ -29,8 +27,6 @@ namespace QuoridorApp.Model
 
         public void InitializeGame()
         {
-            _removedWalls = new Dictionary<int, Wall>();
-            _lastMove = null;
             _placedWalls = new List<Wall>();
             _allowedWalls = new Dictionary<int, Wall>();
             _board = new Board();
@@ -65,8 +61,8 @@ namespace QuoridorApp.Model
         {
             _placedWalls.Add(wall);
             _graph.AddBoundary(wall);
-            if (_graph.GetMinimumDistanceToY(_board.GetPawnLocation(UserInd), ComputerPawnStartingPoint.Y) == -1 ||
-                _graph.GetMinimumDistanceToY(_board.GetPawnLocation(AiInd), UserPawnStartingPoint.Y) == -1)
+            if (!_graph.IsPathsExist(_board.GetPawnLocation(AiInd), UserPawnStartingPoint.Y,
+                    _board.GetPawnLocation(UserInd), ComputerPawnStartingPoint.Y))
             {
                 _graph.RemoveBoundary(wall);
                 return false;
@@ -74,7 +70,6 @@ namespace QuoridorApp.Model
 
             UpdateWallList(wall);
             _board.PlaceWall(_turn, wall);
-            _lastMove = new Move(wall);
             return true;
         }
 
@@ -106,33 +101,6 @@ namespace QuoridorApp.Model
             }
 
             return true;
-        }
-
-        public bool MakeAiMove(Move move)
-        {
-            bool doneSuccessfully = true;
-            if (_board.GetIfSpecialMove())
-            {
-                _board.RemoveSpecialMovePoints(_placedWalls);
-                _graph = new Graph(_board);
-            }
-
-            if (move.GetMoveType())
-                doneSuccessfully = PlaceWall(move.GetWallToPlace());
-            else
-                MoveAiPawn(move.GetPointToMove());
-            if (!doneSuccessfully)
-                return false;
-
-            if (_board.GetIfSpecialMove())
-                _graph = new Graph(_board);
-            return true;
-        }
-
-        private void MoveAiPawn(Point getPointToMove)
-        {
-            _lastMove = new Move(_board.GetPawnLocation(AiInd));
-            _board.MovePawn(_turn, getPointToMove);
         }
 
         public bool CanPlaceWall()
@@ -172,24 +140,14 @@ namespace QuoridorApp.Model
             {
                 if (placedWall.Equals(wall.Value))
                 {
-                    _removedWalls.Add(wall.Key, wall.Value);
-
                     int index = placedWall.Orientation
                         ? placedWall.Y * WallsPerRowAndColumn + placedWall.X + (NumberOfWallsInTheBoard / 2)
                         : placedWall.Y + placedWall.X * WallsPerRowAndColumn;
-
-                    if (_allowedWalls.ContainsKey(index))
-                        _removedWalls.Add(index, _allowedWalls[index]);
-
-                    if (_allowedWalls.ContainsKey(wall.Key - 1))
-                        _removedWalls.Add(wall.Key - 1, _allowedWalls[wall.Key - 1]);
-
-                    if (_allowedWalls.ContainsKey(wall.Key + 1))
-                        _removedWalls.Add(wall.Key + 1, _allowedWalls[wall.Key + 1]);
-
                     _allowedWalls.Remove(wall.Key);
-                    _allowedWalls.Remove(wall.Key - 1);
-                    _allowedWalls.Remove(wall.Key + 1);
+                    if((wall.Key+1) % WallsPerRowAndColumn != 0)
+                        _allowedWalls.Remove(wall.Key + 1);
+                    if(wall.Key % WallsPerRowAndColumn != 0)
+                        _allowedWalls.Remove(wall.Key - 1);
                     _allowedWalls.Remove(index);
                     break;
                 }
@@ -242,36 +200,6 @@ namespace QuoridorApp.Model
             return _board;
         }
 
-        public Game CopyState()
-        {
-            // Create a new instance of the Game class
-            Game copy = new Game
-            {
-                // Copy the state of the instance variables
-                _turn = _turn,
-                _board = new Board(),
-                _removedWalls = new Dictionary<int, Wall>()
-            };
-
-            copy._board.MakeTheSameStates(_board);
-            copy._graph = new Graph(copy._board);
-
-            // Create a new dictionary and copy the allowed walls
-            copy._allowedWalls = new Dictionary<int, Wall>();
-            foreach (KeyValuePair<int, Wall> kvp in _allowedWalls)
-            {
-                copy._allowedWalls.Add(kvp.Key, kvp.Value);
-            }
-
-            copy._placedWalls = new List<Wall>();
-            foreach (Wall wall in _placedWalls)
-            {
-                copy._placedWalls.Add(wall);
-            }
-
-            return copy;
-        }
-
 
         public IEnumerable<Move> GetPossibleMoves()
         {
@@ -290,43 +218,6 @@ namespace QuoridorApp.Model
             }
 
             return moves;
-        }
-
-        public void UndoLastMove()
-        {
-            if (_board.GetIfSpecialMove())
-            {
-                _board.RemoveSpecialMovePoints(_placedWalls);
-                _graph = new Graph(_board);
-            }
-
-            if (_lastMove != null)
-            {
-                if (_lastMove.GetMoveType())
-                {
-                    _placedWalls.Remove(_lastMove.GetWallToPlace());
-                    _board.RemoveSpecialMovePoints(_placedWalls);
-                    _board.AddToWallCount(_turn);
-                    _graph = new Graph(_board);
-                    foreach (var wall in _removedWalls)
-                    {
-                        _allowedWalls.Add(wall.Key, wall.Value);
-                    }
-
-                    _removedWalls.Clear();
-                }
-                else
-                {
-                    _board.MovePawn(_turn, _lastMove.GetPointToMove());
-                }
-
-                _lastMove = null;
-            }
-        }
-
-        public Graph GetGraph()
-        {
-            return _graph;
         }
     }
 }

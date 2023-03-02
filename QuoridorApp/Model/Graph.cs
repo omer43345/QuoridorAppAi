@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Windows.Forms.VisualStyles;
 using static QuoridorApp.Constants;
 
 
@@ -98,9 +99,11 @@ public class Graph
 {
     private Board _board;
     private List<Node> _nodes;
+    private int _count;
 
     public Graph(Board board)
     {
+        _count = 0;
         _board = board;
         _nodes = new List<Node>();
         CreateGraph();
@@ -132,6 +135,48 @@ public class Graph
             }
         }
     }
+    
+    public int CountPathsToY(Point point, int y)
+    {
+        ResetGraph();
+        // Find the starting node based on its coordinates
+        Node start = _nodes[point.X + point.Y * BoardSize];
+
+        // Initialize DFS variables
+        Stack<Node> stack = new Stack<Node>();
+        HashSet<Node> visited = new HashSet<Node>();
+        int pathCount = 0;
+
+        // Push the starting node onto the stack and mark it as visited
+        stack.Push(start);
+        visited.Add(start);
+
+        // DFS algorithm
+        while (stack.Count > 0)
+        {
+            Node current = stack.Pop();
+
+            // Check if the current node has Y-coordinate equal to y
+            if (current.GetPoint().Y == y)
+            {
+                pathCount++;
+                continue;
+            }
+
+            // Visit each neighbor of the current node that hasn't been visited yet
+            foreach (Node neighbor in current.GetNeighbors())
+            {
+                if (!visited.Contains(neighbor))
+                {
+                    stack.Push(neighbor);
+                    visited.Add(neighbor);
+                    neighbor.SetParent(current);
+                }
+            }
+        }
+
+        return pathCount;
+    }
 
 
     // BFS algorithm that returns the minimum distance between starting point and the point with Y-coordinate equal to y
@@ -144,7 +189,7 @@ public class Graph
         // Initialize BFS variables
         Queue<Node> queue = new Queue<Node>();
         HashSet<Node> visited = new HashSet<Node>();
-
+        int minDistance = -1;
         // Enqueue the starting node and mark it as visited
         queue.Enqueue(start);
         visited.Add(start);
@@ -157,7 +202,11 @@ public class Graph
             // Check if the current node has Y-coordinate equal to y
             if (current.GetPoint().Y == y)
             {
-                return current.GetDistance();
+                if (minDistance == -1 || current.GetDistance() == minDistance)
+                {
+                    minDistance = current.GetDistance();
+                    _count++;
+                }
             }
 
             // Visit each neighbor of the current node that hasn't been visited yet
@@ -174,12 +223,24 @@ public class Graph
         }
 
         // If no node with Y-coordinate equal to y was found, return -1
-        return -1;
-    }
+        return minDistance;
 
+    }
+    
+    public bool IsPathsExist(Point point1, int y1, Point point2, int y2)
+    {
+        int distance1 = GetMinimumDistanceToY(point1, y1);
+        int distance2 = GetMinimumDistanceToY(point2, y2);
+        return distance1 != -1 && distance2 != -1;
+    }
+    public int GetMinimumPathsCount()
+    {
+        return _count;
+    }
     // reset the nodes of the graph
     private void ResetGraph()
     {
+        _count = 0;
         foreach (Node node in _nodes)
         {
             node.SetDistance(0);

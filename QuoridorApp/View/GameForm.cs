@@ -147,7 +147,7 @@ namespace QuoridorApp.View
                     wall.MouseLeave += LeaveChosenWall;
                 }
             }
-
+            ChangeVisibilityOfCanMoveSquares( _possibleSquares, false);
             numOfWallsLeftForUser.Text = "USER : 10";
             numOfWallsLeftForComputer.Text = "COMPUTER : 10";
             _gameFormController.ResetGame();
