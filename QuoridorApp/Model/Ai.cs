@@ -97,7 +97,7 @@ public class Ai
             ? userMinPaths * PathCountWeight
             : 0;
         double eval = userEval - aiEval;
-        eval -= userPathToWin == 1 && aiPathToWin != 0 ? 100 : 0;
+        eval -= userPathToWin == 1 && aiPathToWin != 0 ? 1000 : 0;
         eval += _graph.CountPathsToY(pointAi, UserPawnStartingPoint.Y) == 1 ? 100 : 0;
         eval -= _graph.CountPathsToY(pointUser, ComputerPawnStartingPoint.Y) == 1 ? 100 : 0;
         double createMinimumPathOption = aiMinPathEval - userMinPathEval;

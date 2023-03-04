@@ -9,11 +9,12 @@ namespace QuoridorApp.View
 {
     public partial class GameForm : Form
     {
-        private GameFormController _gameFormController;
+        private readonly GameFormController _gameFormController;
         private List<Point> _possibleSquares;
 
         public GameForm()
         {
+            AddHomeIcon();
             AddPawns();
             AddWalls();
             AddCanMoveSquares();
@@ -95,7 +96,7 @@ namespace QuoridorApp.View
 
             clickedWall.MouseLeave -= LeaveChosenWall;
             clickedWall.MouseClick -= PlaceWall;
-            numOfWallsLeftForUser.Text = "USER :" + _gameFormController.GetWallsCounter();
+            numOfWallsLeftForUser.PlayerWalls = _gameFormController.GetWallsCounter();
         }
 
         public void MoveComputerPawn(Point point)
@@ -109,7 +110,7 @@ namespace QuoridorApp.View
             walls[wallIndex].Visible = true;
             walls[wallIndex].MouseClick -= PlaceWall;
             walls[wallIndex].MouseLeave -= LeaveChosenWall;
-            numOfWallsLeftForComputer.Text = "COMPUTER :" + (_gameFormController.GetWallsCounter() - 1);
+            numOfWallsLeftForComputer.PlayerWalls = _gameFormController.GetWallsCounter() - 1;
         }
 
         private void LeaveChosenWall(object sender, EventArgs e)
@@ -147,15 +148,24 @@ namespace QuoridorApp.View
                     wall.MouseLeave += LeaveChosenWall;
                 }
             }
-            ChangeVisibilityOfCanMoveSquares( _possibleSquares, false);
-            numOfWallsLeftForUser.Text = "USER : 10";
-            numOfWallsLeftForComputer.Text = "COMPUTER : 10";
+
+            ChangeVisibilityOfCanMoveSquares(_possibleSquares, false);
+            numOfWallsLeftForUser.PlayerWalls = WallsPerPlayer;
+            numOfWallsLeftForComputer.PlayerWalls = WallsPerPlayer;
             _gameFormController.ResetGame();
         }
 
         private void ResetGameButton_Click(object sender, EventArgs e)
         {
             ResetGame();
+        }
+
+        private void HomeIcon_Click(object sender, MouseEventArgs e)
+        {
+            HomeForm homeForm = new HomeForm();
+            this.Hide();
+            homeForm.ShowDialog();
+            this.Close();
         }
     }
 }

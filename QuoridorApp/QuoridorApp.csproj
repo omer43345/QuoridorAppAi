@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="QuoridorApp">
+      <HintPath>bin\Debug\QuoridorApp.exe</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -64,6 +67,20 @@
     <Compile Include="View\GameForm.Designer.cs">
       <DependentUpon>GameForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="View\RulesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\RulesForm.Designer.cs">
+      <DependentUpon>RulesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\QuoridorButton.cs" />
+    <Compile Include="View\WallsLabel.cs" />
+    <Compile Include="View\HomeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\HomeForm.Designer.cs">
+      <DependentUpon>HomeForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -76,6 +93,9 @@
     </Compile>
     <EmbeddedResource Include="View\GameForm.resx">
       <DependentUpon>GameForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\HomeForm.resx">
+      <DependentUpon>HomeForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -93,9 +113,13 @@
   <ItemGroup>
     <Content Include="Properties\board_square.png" />
     <Content Include="Properties\canMove.png" />
+    <Content Include="Properties\homeBack.jpg" />
+    <Content Include="Properties\homeIcon.png" />
     <Content Include="Properties\icon.ico" />
     <Content Include="Properties\pawn1.png" />
     <Content Include="Properties\pawn2.png" />
+    <Content Include="Properties\rulesIcon.png" />
+    <Content Include="Properties\scrollBack.jpg" />
     <Content Include="Properties\wall.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

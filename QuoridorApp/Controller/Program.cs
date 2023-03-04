@@ -14,9 +14,8 @@ namespace QuoridorApp.Controller
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            GameForm gameForm = new GameForm();
-            GameFormController.GetInstance().InitializeGameFormController(gameForm);
-            Application.Run(gameForm);
+            HomeForm homeForm = new HomeForm();
+            Application.Run(homeForm);
         }
     }
 }

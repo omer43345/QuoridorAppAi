@@ -2,19 +2,21 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using static QuoridorApp.Constants;
 
 namespace QuoridorApp.View
 {
     partial class GameForm
     {
+        private PictureBox homeIcon;
         private bool _clickedOnPawn = false;
         private List<System.Windows.Forms.PictureBox> walls = new List<PictureBox>();
         private PictureBox[,] canMoveSquares = new PictureBox[9, 9];
         private PictureBox userPawn;
         private PictureBox computerPawn;
-        private Label numOfWallsLeftForUser;
-        private Label numOfWallsLeftForComputer;
-        private Button resetGameButton;
+        private WallsLabel numOfWallsLeftForUser;
+        private WallsLabel numOfWallsLeftForComputer;
+        private QuoridorButton resetGameButton;
 
         /// <summary>
         /// Required designer variable.
@@ -35,22 +37,38 @@ namespace QuoridorApp.View
             base.Dispose(disposing);
         }
 
+        private void AddHomeIcon()
+        {
+            homeIcon = new PictureBox();
+            homeIcon.Location = new Point(773, 0);
+            homeIcon.Name = "HomeAnimation";
+            homeIcon.Size = new Size(50, 50);
+            homeIcon.BackColor = Color.Transparent;
+            homeIcon.Image = ((Image)(Properties.Resources.homeIcon));
+            homeIcon.SizeMode = PictureBoxSizeMode.StretchImage;
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(homeIcon, "Go back to the main menu");
+            homeIcon.MouseClick += new MouseEventHandler(HomeIcon_Click);
+            Controls.Add(homeIcon);
+        }
+        
         private void AddResetGameButton()
         {
-            resetGameButton = new Button();
-            resetGameButton.Location = new Point(12, 80);
+            resetGameButton = new QuoridorButton();
+            resetGameButton.Location = new Point(261, 480);
             resetGameButton.Name = "ResetGameButton";
             resetGameButton.Text = "Reset Game";
-            resetGameButton.Font = new Font(resetGameButton.Font.FontFamily, 10, FontStyle.Bold);
-            resetGameButton.Size = new Size(150, 50);
+            resetGameButton.Font = new Font(resetGameButton.Font.FontFamily, 20, FontStyle.Bold);
+            resetGameButton.Size = new Size(300, 100);
+            resetGameButton.ToolTipText = "Reset the game";
             resetGameButton.MouseClick += new MouseEventHandler(ResetGameButton_Click);
             Controls.Add(resetGameButton);
         }
 
         private void AddWallCounters()
         {
-            numOfWallsLeftForUser = new Label();
-            numOfWallsLeftForComputer = new Label();
+            numOfWallsLeftForUser = new WallsLabel();
+            numOfWallsLeftForComputer = new WallsLabel();
             Label WallLeftLabel = new Label();
 
 
@@ -61,15 +79,15 @@ namespace QuoridorApp.View
             WallLeftLabel.Size = new Size(150, 30);
 
             numOfWallsLeftForUser.Location = new Point(12, 30);
-            numOfWallsLeftForUser.Name = "USER";
-            numOfWallsLeftForUser.Text = "USER : 10";
-            numOfWallsLeftForUser.Font = new Font(numOfWallsLeftForComputer.Font.FontFamily, 8, FontStyle.Bold);
+            numOfWallsLeftForUser.Name = User;
+            numOfWallsLeftForUser.PlayerName= User;
+            numOfWallsLeftForUser.Font = new Font(numOfWallsLeftForComputer.Font.FontFamily, 10, FontStyle.Bold);
             numOfWallsLeftForUser.Size = new Size(150, 20);
 
             numOfWallsLeftForComputer.Location = new Point(12, 55);
-            numOfWallsLeftForComputer.Name = "COMPUTER";
-            numOfWallsLeftForComputer.Text = "COMPUTER : 10";
-            numOfWallsLeftForComputer.Font = new Font(numOfWallsLeftForComputer.Font.FontFamily, 8, FontStyle.Bold);
+            numOfWallsLeftForComputer.Name = Computer;
+            numOfWallsLeftForComputer.PlayerName = Computer;
+            numOfWallsLeftForComputer.Font = new Font(numOfWallsLeftForComputer.Font.FontFamily, 10, FontStyle.Bold);
             numOfWallsLeftForComputer.Size = new Size(150, 20);
 
             Controls.Add(numOfWallsLeftForUser);
