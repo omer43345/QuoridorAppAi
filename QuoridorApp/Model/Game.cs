@@ -59,7 +59,6 @@ namespace QuoridorApp.Model
 
         private bool PlaceWall(Wall wall)
         {
-            _placedWalls.Add(wall);
             _graph.AddBoundary(wall);
             if (!_graph.IsPathsExist(_board.GetPawnLocation(AiInd), UserPawnStartingPoint.Y,
                     _board.GetPawnLocation(UserInd), ComputerPawnStartingPoint.Y))
@@ -67,7 +66,7 @@ namespace QuoridorApp.Model
                 _graph.RemoveBoundary(wall);
                 return false;
             }
-
+            _placedWalls.Add(wall);
             UpdateWallList(wall);
             _board.PlaceWall(_turn, wall);
             return true;

@@ -8,7 +8,7 @@ public partial class RulesForm : Form
     {
         AddRules();
         AddHomeIcon();
-        InitializeComponent();
+        InitFrom();
     }
 
     private void HomeIcon_Click(object sender, MouseEventArgs e)

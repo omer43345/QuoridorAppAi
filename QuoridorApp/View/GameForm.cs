@@ -21,7 +21,7 @@ namespace QuoridorApp.View
             AddSquares();
             AddWallCounters();
             AddResetGameButton();
-            InitializeComponent();
+            InitFrom();
             _gameFormController = GameFormController.GetInstance();
             _possibleSquares = new List<Point>();
         }

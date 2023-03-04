@@ -201,14 +201,7 @@ namespace QuoridorApp.View
             Controls.Add(computerPawn);
             Controls.Add(userPawn);
         }
-
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
+        private void InitFrom()
         {
             System.ComponentModel.ComponentResourceManager resources =
                 new System.ComponentModel.ComponentResourceManager(typeof(GameForm));
@@ -228,7 +221,7 @@ namespace QuoridorApp.View
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.CanPlaceWall);
             this.ResumeLayout(false);
         }
-
+        #region Windows Form Designer generated code
         #endregion
     }
 }

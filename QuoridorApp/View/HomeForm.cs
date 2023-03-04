@@ -13,7 +13,7 @@ public partial class HomeForm : Form
         AddQuoridorLabel();
         AddStartGameButton();
         AddRulesIcon();
-        InitializeComponent();
+        InitForm();
     }
 
     private void StartGameButton_Click(object sender, MouseEventArgs e)

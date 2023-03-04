@@ -65,16 +65,12 @@ partial class RulesForm
         rules.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
         Controls.Add(rules);
     }
-    
-    #region Windows Form Designer generated code
-
-    /// <summary>
-    /// Required method for Designer support - do not modify
-    /// the contents of this method with the code editor.
-    /// </summary>
-    private void InitializeComponent()
+    private void InitFrom()
     {
         this.SuspendLayout();
+        //
+        // RulesForm
+        //
         this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(823, 649);
@@ -85,6 +81,6 @@ partial class RulesForm
         this.Text = "Quoridor";
         this.ResumeLayout(false);
     }
-
+    #region Windows Form Designer generated code
     #endregion
 }
