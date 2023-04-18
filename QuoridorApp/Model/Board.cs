@@ -191,14 +191,24 @@ public class Board
         this._pawns[AiInd].SetWallCount(board.GetWallCount(AiInd));
     }
 
-
+    public void RemoveWall(int turn)
+    {
+        _pawns[turn].RemoveWall();
+    }
     public Point GetPawnLocation(int turn)
     {
         return _pawns[turn].Location;
     }
 
-    public void AddToWallCount(int turn)
+    public void ReturnToLastLocation(int turn)
     {
-        _pawns[turn].AddWall();
+        _pawns[turn].SetLocation(_pawns[turn].LastLocation);
+    }
+
+    public Board GetCopy()
+    {
+        Board board = new Board();
+        board.MakeTheSameStates(this);
+        return board;
     }
 }

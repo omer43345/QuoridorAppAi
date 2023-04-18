@@ -8,12 +8,18 @@ namespace QuoridorApp.Model;
 public class Ai
 {
     private readonly Game _game; // game copy
-    private readonly Graph _graph; // graph copy
+    private Graph _graph; // graph copy
+    private readonly Board _board; // board copy
 
     public Ai()
     {
         _game = Game.GetInstance(); // copy the game state
-        _graph = new Graph(_game.GetBoard()); // copy the graph state
+        _board = _game.GetBoardCopy(); // copy the board state
+        if (_board.GetIfSpecialMove())
+            _board.RemoveSpecialMovePoints(_game.GetPlacedWalls());
+        _graph = new Graph(_board); // copy the graph state
+
+            
     }
 
     public Move GetAiMove()
@@ -21,10 +27,10 @@ public class Ai
         double bestEval = int.MinValue;
         Move bestMove = null;
         IEnumerable<Move> possibleMoves = _game.GetPossibleMoves();
-        Point userSquare = _game.GetBoard().GetPawnLocation(UserInd);
-        Point aiSquare = _game.GetBoard().GetPawnLocation(AiInd);
-        int userWalls = _game.GetBoard().GetWallCount(UserInd);
-        int aiWalls = _game.GetBoard().GetWallCount(AiInd);
+        Point userSquare = _board.GetPawnLocation(UserInd);
+        Point aiSquare = _board.GetPawnLocation(AiInd);
+        int userWalls = _board.GetWallCount(UserInd);
+        int aiWalls = _board.GetWallCount(AiInd);
         foreach (Move move in possibleMoves)
         {
             if (MakeTempMove(move, ref aiWalls, ref aiSquare))
@@ -48,19 +54,22 @@ public class Ai
         if (move.GetMoveType())
         {
             _graph.AddBoundary(move.GetWallToPlace());
-            if (!_graph.IsPathsExist(_game.GetBoard().GetPawnLocation(UserInd), ComputerPawnStartingPoint.Y, aiSquare,
+            if (!_graph.IsPathsExist(_board.GetPawnLocation(UserInd), ComputerPawnStartingPoint.Y, aiSquare,
                     UserPawnStartingPoint.Y))
             {
                 _graph.RemoveBoundary(move.GetWallToPlace());
                 return false;
             }
-
+            _board.PlaceWall(AiInd, move.GetWallToPlace());
             aiWalls--;
         }
         else
         {
             aiSquare = move.GetPointToMove();
+            _board.MovePawn(AiInd, aiSquare);
         }
+        if (_board.GetIfSpecialMove())
+            _graph = new Graph(_board);
 
         return true;
     }
@@ -70,12 +79,22 @@ public class Ai
         if (move.GetMoveType())
         {
             _graph.RemoveBoundary(move.GetWallToPlace());
+            _board.RemoveWall(AiInd);
             aiWalls++;
         }
         else
         {
-            aiSquare = _game.GetBoard().GetPawnLocation(AiInd);
+            _board.ReturnToLastLocation(AiInd);
+            aiSquare = _board.GetPawnLocation(AiInd);
+            
         }
+
+        if (_board.GetIfSpecialMove())
+        {
+            _board.RemoveSpecialMovePoints(_game.GetPlacedWalls());
+            _graph = new Graph(_board); 
+        }
+
     }
 
     private double EvaluateMove(Point pointUser, Point pointAi, int userWalls, int aiWalls)

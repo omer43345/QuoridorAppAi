@@ -198,8 +198,16 @@ namespace QuoridorApp.Model
         {
             return _board;
         }
+        
+        public Board GetBoardCopy()
+        {
+            return _board.GetCopy();
+        }
 
-
+        public List< Wall> GetPlacedWalls()
+        {
+            return _placedWalls;
+        }
         public IEnumerable<Move> GetPossibleMoves()
         {
             List<Move> moves = new List<Move>();
