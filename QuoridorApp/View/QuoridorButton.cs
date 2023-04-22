@@ -5,12 +5,13 @@ using System.Windows.Forms;
 
 namespace QuoridorApp.View;
 
+// class that represents a button in the project, inherits from Button class and have a ToolTipText property and some special attributes
 public class QuoridorButton : Button
 {
     private const int Radius = 10;
     private string _toolTipText;
     
-    
+    // adding the option to set the tooltip text of the button very easily.
     public string ToolTipText
     {
         get => _toolTipText;
@@ -22,6 +23,7 @@ public class QuoridorButton : Button
         }
     }
 
+    // Constructor that sets the default properties of the button and add some special attributes like round edges and no border.
     public QuoridorButton()
     {
         // Set the default properties of the button.
@@ -41,6 +43,7 @@ public class QuoridorButton : Button
         set => base.BackColor = value;
     }
 
+    // add to the button a filled triangle in the top left corner, this happens when the button is painted.
     protected override void OnPaint(PaintEventArgs e)
     {
 

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using static QuoridorApp.Constants;
+
 
 namespace QuoridorApp.View;
 
@@ -27,7 +29,7 @@ partial class HomeForm
 
         base.Dispose(disposing);
     }
-    
+    // this function adds the Quoridor label to the form
     private void AddQuoridorLabel()
     {
         QuoridorLabel = new Label();
@@ -42,6 +44,7 @@ partial class HomeForm
         Controls.Add(QuoridorLabel);
 
     }
+    // this function adds the rules icon to the form
     private void AddRulesIcon()
     {
         rulesIcon = new PictureBox();
@@ -56,6 +59,7 @@ partial class HomeForm
         rulesIcon.MouseClick += new MouseEventHandler(rulesIcon_Click);
         Controls.Add(rulesIcon);
     }
+    // this function adds the play button to the form
     private void AddStartGameButton()
     {
         playButton = new QuoridorButton();
@@ -69,7 +73,7 @@ partial class HomeForm
         playButton.MouseClick += new MouseEventHandler(StartGameButton_Click);
         Controls.Add(playButton);
     }
-
+    // this function initializes the form
     private void InitForm()
     {
         this.SuspendLayout();
@@ -79,7 +83,7 @@ partial class HomeForm
         this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.BackgroundImage = ((System.Drawing.Image)(Properties.Resources.homeBackground));
-        this.ClientSize = new System.Drawing.Size(823, 649);
+        this.ClientSize = new System.Drawing.Size(FormWidth, FormHeight);
         this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
         this.Name = "GameForm";
         this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

@@ -22,9 +22,10 @@ public static class Constants
     public const string Down = "down";
     public const string Computer = "Computer";
     public const string User = "User";
-    public const double NumberOfWallsWeight = 1.3; // Weight of the number of walls in the evaluation function
-    public const double ShortestPathWeight = 1.2; // Weight of the shortest path in the evaluation function
-    public const double PathCountWeight = 0.3; // Weight of the number of paths in the evaluation function
+    public const double NumberOfWallsWeight = 0.8; // Weight of the number of walls in the evaluation function
+    public const double ShortestPathWeight = 3.2; // Weight of the shortest path in the evaluation function
+    public const double PathCountWeight = 5; // Weight when the number of paths is equal to the number of shortest paths in the evaluation function
+    public const double OnePathBonus = 100; // bonus for having only one path
     public const string QuoridorRules =
         "Quoridor is played on a game board of 81 square spaces (9x9). Each player is represented by a pawn which" +
         " begins at the center space of one edge of the board (in a two-player game, the pawns begin opposite each other)." +
@@ -40,4 +41,10 @@ public static class Constants
         " due to a pawn or wall being behind a jumped pawn.\n\n" +
         "Walls can be placed directly between two spaces, in any groove not already occupied by a wall. However," +
         " a wall may not be placed which cuts off the only remaining path of any pawn to the side of the board it must reach.";
+    public const int FormWidth = 823;
+    public const int FormHeight = 649;
+    
+    
+    
+    
 }

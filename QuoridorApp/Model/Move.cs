@@ -5,10 +5,12 @@ namespace QuoridorApp.Model;
 // class that representing the chosen move, contains wall to place or point to move to
 public class Move
 {
-    private Point _pointToMove; // point to move to
-    private Wall _wallToPlace; // wall to place
-    private bool _moveType; // true if wall to place, false if point to move
+    private readonly Point _pointToMove; // point to move to
+    private readonly Wall _wallToPlace; // wall to place
+    private readonly bool _moveType; // true if wall to place, false if point to move
 
+    
+    // constructor for wall move type
     public Move(Wall wall)
     {
         _wallToPlace = wall;
@@ -16,7 +18,7 @@ public class Move
         _moveType = true;
     }
 
-
+    // constructor for point move type
     public Move(Point point)
     {
         _pointToMove = point;

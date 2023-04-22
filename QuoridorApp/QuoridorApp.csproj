@@ -73,8 +73,12 @@
     <Compile Include="View\RulesForm.Designer.cs">
       <DependentUpon>RulesForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="View\QuoridorButton.cs" />
-    <Compile Include="View\WallsLabel.cs" />
+    <Compile Include="View\QuoridorButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="View\WallsLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="View\HomeForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -8,15 +8,15 @@ namespace QuoridorApp.View
 {
     partial class GameForm
     {
-        private PictureBox homeIcon;
-        private bool _clickedOnPawn = false;
-        private List<System.Windows.Forms.PictureBox> walls = new List<PictureBox>();
-        private PictureBox[,] canMoveSquares = new PictureBox[9, 9];
-        private PictureBox userPawn;
-        private PictureBox computerPawn;
-        private WallsLabel numOfWallsLeftForUser;
-        private WallsLabel numOfWallsLeftForComputer;
-        private QuoridorButton resetGameButton;
+        private PictureBox homeIcon; // the home icon that the user can click on to go back to the home form
+        private bool _clickedOnPawn = false; // a flag that indicates if the user clicked on his pawn
+        private List<System.Windows.Forms.PictureBox> walls = new List<PictureBox>(); // a list of the walls that the user can place on the board
+        private PictureBox[,] canMoveSquares = new PictureBox[9, 9];// a matrix of the squares that the user can move to if he clicks on his pawn
+        private PictureBox userPawn;// the user pawn
+        private PictureBox computerPawn;// the computer pawn
+        private WallsLabel numOfWallsLeftForUser;// the label that shows the number of walls that the user has left
+        private WallsLabel numOfWallsLeftForComputer;// the label that shows the number of walls that the computer has left
+        private QuoridorButton resetGameButton;// the button that the user can click on to reset the game
 
         /// <summary>
         /// Required designer variable.
@@ -36,7 +36,7 @@ namespace QuoridorApp.View
 
             base.Dispose(disposing);
         }
-
+        // this function adds the home icon to the form
         private void AddHomeIcon()
         {
             homeIcon = new PictureBox();
@@ -51,7 +51,7 @@ namespace QuoridorApp.View
             homeIcon.MouseClick += new MouseEventHandler(HomeIcon_Click);
             Controls.Add(homeIcon);
         }
-        
+        // this function adds the reset game button to the form
         private void AddResetGameButton()
         {
             resetGameButton = new QuoridorButton();
@@ -64,7 +64,7 @@ namespace QuoridorApp.View
             resetGameButton.MouseClick += new MouseEventHandler(ResetGameButton_Click);
             Controls.Add(resetGameButton);
         }
-
+        // this function adds the wall counters to the form
         private void AddWallCounters()
         {
             numOfWallsLeftForUser = new WallsLabel();
@@ -94,18 +94,18 @@ namespace QuoridorApp.View
             Controls.Add(numOfWallsLeftForComputer);
             Controls.Add(WallLeftLabel);
         }
-
+        // this function adds the walls to the form
         private void AddWalls()
         {
             PictureBox wall;
             // vertical walls
-            for (int i = 0; i < 64; i++)
+            for (int i = 0; i < NumberOfWallsInTheBoard/2; i++)
             {
                 wall = new PictureBox();
                 wall.Image = ((Image)(Properties.Resources.wall));
                 int y = i % 2 == 0 ? 51 : 95;
-                wall.Location = new Point(251 + (46 * (i / 8)), y + ((i % 8) / 2 * 92));
-                wall.Name = "wallv" + i / 8 + "_" + i % 8;
+                wall.Location = new Point(251 + (46 * (i / WallsPerRowAndColumn)), y + ((i % WallsPerRowAndColumn) / 2 * 92));
+                wall.Name = "wallv" + i / WallsPerRowAndColumn + "_" + i % WallsPerRowAndColumn;
                 wall.Size = new Size(6, 78);
                 wall.SizeMode = PictureBoxSizeMode.CenterImage;
                 wall.Visible = false;
@@ -116,13 +116,13 @@ namespace QuoridorApp.View
             }
 
             // horizontal walls
-            for (int i = 64; i < 128; i++)
+            for (int i = NumberOfWallsInTheBoard/2; i < NumberOfWallsInTheBoard; i++)
             {
                 wall = new PictureBox();
                 wall.Image = ((Image)(Properties.Resources.wall));
                 int x = i % 2 == 0 ? 213 : 260;
-                wall.Location = new Point(x + ((i % 8) / 2 * 92), 85 + (46 * (i % 64 / 8)));
-                wall.Name = "wallh" + i / 8 + "_" + i % 8;
+                wall.Location = new Point(x + ((i % WallsPerRowAndColumn) / 2 * 92), 85 + (46 * (i % 64 / WallsPerRowAndColumn)));
+                wall.Name = "wallh" + i / WallsPerRowAndColumn + "_" + i % WallsPerRowAndColumn;
                 wall.Size = new Size(78, 6);
                 wall.SizeMode = PictureBoxSizeMode.CenterImage;
                 wall.Visible = false;
@@ -133,13 +133,13 @@ namespace QuoridorApp.View
                 walls.Add(wall);
             }
         }
-
+        // this function adds the squares that the user can move to
         private void AddCanMoveSquares()
         {
             Image canMoveSquare = Properties.Resources.canMove;
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < BoardSize; i++)
             {
-                for (int j = 0; j < 9; j++)
+                for (int j = 0; j < BoardSize; j++)
                 {
                     canMoveSquares[i, j] = new PictureBox();
                     canMoveSquares[i, j].BackColor = Color.LightGray;
@@ -155,13 +155,13 @@ namespace QuoridorApp.View
                 }
             }
         }
-
+        // this function adds the squares to the form
         private void AddSquares()
         {
             Image square = Properties.Resources.board_square;
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < BoardSize; i++)
             {
-                for (int j = 0; j < 9; j++)
+                for (int j = 0; j < BoardSize; j++)
                 {
                     PictureBox boardSquare = new PictureBox();
                     boardSquare.Image = ((Image)(square));
@@ -172,7 +172,7 @@ namespace QuoridorApp.View
                 }
             }
         }
-
+        // this function adds the pawns to the form
         private void AddPawns()
         {
             //
@@ -201,6 +201,7 @@ namespace QuoridorApp.View
             Controls.Add(computerPawn);
             Controls.Add(userPawn);
         }
+        // this function initializes the form
         private void InitFrom()
         {
             System.ComponentModel.ComponentResourceManager resources =
@@ -212,7 +213,7 @@ namespace QuoridorApp.View
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.RoyalBlue;
-            this.ClientSize = new System.Drawing.Size(823, 649);
+            this.ClientSize = new System.Drawing.Size(FormWidth, FormHeight);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "GameForm";

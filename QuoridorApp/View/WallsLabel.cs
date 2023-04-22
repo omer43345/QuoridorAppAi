@@ -5,6 +5,7 @@ using static QuoridorApp.Constants;
 
 namespace QuoridorApp.View;
 
+// Class that represents a label that shows the number of walls that a player has left. it inherits from Label and add 2 properties: player walls and player name.
 public sealed class WallsLabel : Label
 {
     private int _playerWalls = WallsPerPlayer;
@@ -30,6 +31,7 @@ public sealed class WallsLabel : Label
         }
     }
 
+    // Constructor that sets the default properties of the label and add event handlers for mouse enter and mouse leave.
     public WallsLabel()
     {
         // Set the default properties of the label.
@@ -42,11 +44,14 @@ public sealed class WallsLabel : Label
         this.MouseLeave += WallsLabel_MouseLeave;
     }
 
+    // Method that updates the text of the label. it is called when the player walls or player name properties are changed.
     private void UpdateLabelText()
     {
         this.Text = _playerName + ": " + _playerWalls;
     }
 
+    // Event handler for mouse enter and mouse leave events. it changes the border style and padding of the label.
+    
     private void WallsLabel_MouseEnter(object sender, EventArgs e)
     {
         this.BorderStyle = BorderStyle.FixedSingle;

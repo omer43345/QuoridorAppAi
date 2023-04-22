@@ -28,6 +28,8 @@ partial class RulesForm
 
         base.Dispose(disposing);
     }
+    
+    // this function adds the home icon to the form
     private void AddHomeIcon()
     {
         homeIcon = new PictureBox();
@@ -42,6 +44,8 @@ partial class RulesForm
         homeIcon.MouseClick += new MouseEventHandler(HomeIcon_Click);
         Controls.Add(homeIcon);
     }
+    
+    // this function adds the rules label to the form
     private void AddRules()
     {
         rulesLabel = new Label();
@@ -65,6 +69,8 @@ partial class RulesForm
         rules.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
         Controls.Add(rules);
     }
+    
+    // this function initializes the form
     private void InitFrom()
     {
         this.SuspendLayout();
@@ -73,7 +79,7 @@ partial class RulesForm
         //
         this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(823, 649);
+        this.ClientSize = new System.Drawing.Size(FormWidth, FormHeight);
         this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
         this.BackgroundImage = ((System.Drawing.Image)(Properties.Resources.scrollBackground));
         this.Name = "RulesForm";

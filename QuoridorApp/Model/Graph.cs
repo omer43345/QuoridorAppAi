@@ -1,20 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Forms.VisualStyles;
 using static QuoridorApp.Constants;
 
 
 namespace QuoridorApp.Model;
 
-// class that representing the node of the graph
+// class that representing a node in the graph
 public class Node
 {
-    private Point _point;
-    private List<Node> _neighbors;
-    private bool _isVisited;
-    private Node _parent;
-    private int _distance;
-    private Node _removedNeighbor;
+    private Point _point;// the point of the node
+    private readonly List<Node> _neighbors;// the neighbors of the node
+    private bool _isVisited;// true if the node is visited, false otherwise
+    private Node _parent;// the parent of the node
+    private int _distance;// the distance from the node to the source node
+    private Node _removedNeighbor;// the neighbor that was removed from the node's neighbors list
 
     public Node(Point point)
     {
@@ -25,17 +24,25 @@ public class Node
         _distance = 0;
     }
 
+    
+    // add a neighbor to the node's neighbors list
     public void AddNeighbor(Node node)
     {
         _neighbors.Add(node);
     }
 
+    /// <summary>
+    ///  find the neighbor to remove from the list according to the given side, add it to the removed neighbor
+    /// and remove it from the node's neighbors list
+    /// </summary>
+    /// <param name="side"></param>
     public void RemoveNeighbor(string side)
     {
         Node leftNeighbor = null;
         Node rightNeighbor = null;
         Node upNeighbor = null;
         Node downNeighbor = null;
+        // find the neighbors from the given side
         foreach (var neighbor in _neighbors)
         {
             leftNeighbor = neighbor._point.X < this._point.X ? neighbor : leftNeighbor;
@@ -43,7 +50,7 @@ public class Node
             upNeighbor = neighbor._point.Y < this._point.Y ? neighbor : upNeighbor;
             downNeighbor = neighbor._point.Y > this._point.Y ? neighbor : downNeighbor;
         }
-
+        // remove the neighbor from the list of neighbors and save it in the removed neighbor
         if (side == Left)
             _removedNeighbor = leftNeighbor;
         else if (side == Right)
@@ -55,6 +62,7 @@ public class Node
         _neighbors.Remove(_removedNeighbor);
     }
 
+    // add the removed neighbor to the node's neighbors list and set the removed neighbor to null
     public void AddRemovedNeighbor()
     {
         Node nodeToAdd = _removedNeighbor;
@@ -97,10 +105,9 @@ public class Node
 // class that creating the graph of the board and contains some graph algorithms
 public class Graph
 {
-    private Board _board;
-    private List<Node> _nodes;
-    private int _count;
-
+    private readonly Board _board;// the board of the game
+    private readonly List<Node> _nodes;// the nodes of the graph
+    private int _count;// the number of minimum paths from the starting point to the point with Y-coordinate equal to y
     public Graph(Board board)
     {
         _count = 0;
@@ -109,6 +116,11 @@ public class Graph
         CreateGraph();
     }
 
+    /// <summary>
+    ///  create the graph of the board by creating nodes for each point on the board
+    ///  and adding neighbors to each node according to the board.
+    ///  all this using the board copy two dimensional array of lists of points that represents the board. 
+    /// </summary>
     private void CreateGraph()
     {
         List<Point>[,] boardCopy = _board.GetBoardCopy();
@@ -136,6 +148,12 @@ public class Graph
         }
     }
     
+    /// <summary>
+    /// count the number of paths from the starting point to the point with Y-coordinate equal to y using DFS algorithm
+    /// </summary>
+    /// <param name="point"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     public int CountPathsToY(Point point, int y)
     {
         ResetGraph();
@@ -179,7 +197,13 @@ public class Graph
     }
 
 
-    // BFS algorithm that returns the minimum distance between starting point and the point with Y-coordinate equal to y
+    /// <summary>
+    /// return the minimum distance from the starting point to the point with Y-coordinate equal
+    /// to y using BFS algorithm,also count the shortest paths 
+    /// </summary>
+    /// <param name="point"> the point we calculate from</param>
+    /// <param name="y">the wanted y</param>
+    /// <returns></returns>
     public int GetMinimumDistanceToY(Point point, int y)
     {
         ResetGraph();
@@ -226,7 +250,17 @@ public class Graph
         return minDistance;
 
     }
-    
+    /// <summary>
+    ///  check if there is a path for each of the two points to the point with Y-coordinate equal to y.
+    ///  every point represent the pawn's position on the board and y represent the Y-coordinate of the point that
+    ///  the pawn should reach. The function return true if there is a path for each of the two points to the point
+    ///  with Y-coordinate equal to y and false otherwise.
+    /// </summary>
+    /// <param name="point1"> one of the pawns position</param>
+    /// <param name="y1"> the row he needs to win</param>
+    /// <param name="point2"> one of the pawns position</param>
+    /// <param name="y2">the row he needs to win</param>
+    /// <returns></returns>
     public bool IsPathsExist(Point point1, int y1, Point point2, int y2)
     {
         int distance1 = GetMinimumDistanceToY(point1, y1);
@@ -237,7 +271,7 @@ public class Graph
     {
         return _count;
     }
-    // reset the nodes of the graph
+    // reset all the nodes in the graph to their initial state
     private void ResetGraph()
     {
         _count = 0;
@@ -249,6 +283,11 @@ public class Graph
         }
     }
 
+    /// <summary>
+    /// remove boundary from the graph according to the wall that was removed,
+    /// update the graph accordingly by adding the removed neighbors to the nodes that are adjacent to the removed wall
+    /// </summary>
+    /// <param name="wall"></param>
     public void RemoveBoundary(Wall wall)
     {
         _nodes[wall.X + wall.Y * BoardSize].AddRemovedNeighbor();
@@ -257,6 +296,11 @@ public class Graph
         _nodes[wall.X + 1 + (wall.Y + 1) * BoardSize].AddRemovedNeighbor();
     }
 
+    /// <summary>
+    ///  add boundary to the graph according to the wall that was added,
+    ///  update the graph accordingly by removing the neighbors of the nodes that are adjacent to the added wall.
+    /// </summary>
+    /// <param name="wall"></param>
     public void AddBoundary(Wall wall)
     {
         if (wall.Orientation)
