@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using QuoridorApp.Controller;
+using QuoridorApp.Model;
 using static QuoridorApp.Constants;
 
 namespace QuoridorApp.View
@@ -11,7 +12,7 @@ namespace QuoridorApp.View
     public partial class GameForm : Form
     {
         private readonly GameFormController _gameFormController;
-        private List<Point> _possibleSquares;
+        private List<Cell> _possibleSquares;
 
         // initialize the form by adding the components, creating a new game form controller and initializing the game form controller
         public GameForm()
@@ -25,7 +26,7 @@ namespace QuoridorApp.View
             AddResetGameButton();
             InitFrom();
             _gameFormController = GameFormController.GetInstance();
-            _possibleSquares = new List<Point>();
+            _possibleSquares = new List<Cell>();
         }
 
         // called for every mouse move on the game form, it checks if the user can place a wall in the current mouse position and if so it shows the wall in the current mouse position
@@ -63,7 +64,7 @@ namespace QuoridorApp.View
             }
         }
         // called when a user click on his pawn and it changes the visibility of the possible squares that the pawn can move to
-        private void ChangeVisibilityOfCanMoveSquares(List<Point> possibleSquares, bool visible)
+        private void ChangeVisibilityOfCanMoveSquares(List<Cell> possibleSquares, bool visible)
         {
             foreach (var square in possibleSquares)
             {

@@ -1,23 +1,21 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using static QuoridorApp.Constants;
-
 
 namespace QuoridorApp.Model;
 
 // class that representing a node in the graph
 public class Node
 {
-    private Point _point;// the point of the node
+    private readonly Cell _cell;// the cell of the node
     private readonly List<Node> _neighbors;// the neighbors of the node
     private bool _isVisited;// true if the node is visited, false otherwise
     private Node _parent;// the parent of the node
     private int _distance;// the distance from the node to the source node
     private Node _removedNeighbor;// the neighbor that was removed from the node's neighbors list
 
-    public Node(Point point)
+    public Node(Cell cell)
     {
-        _point = point;
+        _cell = cell;
         _neighbors = new List<Node>();
         _isVisited = false;
         _parent = null;
@@ -45,10 +43,10 @@ public class Node
         // find the neighbors from the given side
         foreach (var neighbor in _neighbors)
         {
-            leftNeighbor = neighbor._point.X < this._point.X ? neighbor : leftNeighbor;
-            rightNeighbor = neighbor._point.X > this._point.X ? neighbor : rightNeighbor;
-            upNeighbor = neighbor._point.Y < this._point.Y ? neighbor : upNeighbor;
-            downNeighbor = neighbor._point.Y > this._point.Y ? neighbor : downNeighbor;
+            leftNeighbor = neighbor._cell.X < this._cell.X ? neighbor : leftNeighbor;
+            rightNeighbor = neighbor._cell.X > this._cell.X ? neighbor : rightNeighbor;
+            upNeighbor = neighbor._cell.Y < this._cell.Y ? neighbor : upNeighbor;
+            downNeighbor = neighbor._cell.Y > this._cell.Y ? neighbor : downNeighbor;
         }
         // remove the neighbor from the list of neighbors and save it in the removed neighbor
         if (side == Left)
@@ -85,9 +83,9 @@ public class Node
         _distance = distance;
     }
 
-    public Point GetPoint()
+    public Cell GetPoint()
     {
-        return _point;
+        return _cell;
     }
 
 
@@ -107,7 +105,7 @@ public class Graph
 {
     private readonly Board _board;// the board of the game
     private readonly List<Node> _nodes;// the nodes of the graph
-    private int _count;// the number of minimum paths from the starting point to the point with Y-coordinate equal to y
+    private int _count;// the number of minimum paths from the starting cell to the cell with Y-coordinate equal to y
     public Graph(Board board)
     {
         _count = 0;
@@ -117,19 +115,19 @@ public class Graph
     }
 
     /// <summary>
-    ///  create the graph of the board by creating nodes for each point on the board
+    ///  create the graph of the board by creating nodes for each cell in the board
     ///  and adding neighbors to each node according to the board.
-    ///  all this using the board copy two dimensional array of lists of points that represents the board. 
+    ///  all this using the board copy two dimensional array of lists of cells that represents the board. 
     /// </summary>
     private void CreateGraph()
     {
-        List<Point>[,] boardCopy = _board.GetBoardCopy();
-        // create nodes for the graph, every node represents a point on the board
+        List<Cell>[,] boardCopy = _board.GetBoardCopy();
+        // create nodes for the graph, every node represents a cell on the board
         for (int i = 0; i < BoardSize; i++)
         {
             for (int j = 0; j < BoardSize; j++)
             {
-                Node node = new Node(new Point(j, i));
+                Node node = new Node(new Cell(j, i));
                 _nodes.Add(node);
             }
         }
@@ -140,25 +138,25 @@ public class Graph
             for (int j = 0; j < BoardSize; j++)
             {
                 Node node = _nodes[i * BoardSize + j];
-                foreach (var point in boardCopy[i, j])
+                foreach (var cell in boardCopy[i, j])
                 {
-                    node.AddNeighbor(_nodes[point.X + point.Y * BoardSize]);
+                    node.AddNeighbor(_nodes[cell.X + cell.Y * BoardSize]);
                 }
             }
         }
     }
     
     /// <summary>
-    /// count the number of paths from the starting point to the point with Y-coordinate equal to y using DFS algorithm
+    /// count the number of paths from the starting cell to the cell with Y-coordinate equal to y using DFS algorithm
     /// </summary>
-    /// <param name="point"></param>
+    /// <param name="cell"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    public int CountPathsToY(Point point, int y)
+    public int CountPathsToY(Cell cell, int y)
     {
         ResetGraph();
         // Find the starting node based on its coordinates
-        Node start = _nodes[point.X + point.Y * BoardSize];
+        Node start = _nodes[cell.X + cell.Y * BoardSize];
 
         // Initialize DFS variables
         Stack<Node> stack = new Stack<Node>();
@@ -176,19 +174,18 @@ public class Graph
 
             // Check if the current node has Y-coordinate equal to y
             if (current.GetPoint().Y == y)
-            {
                 pathCount++;
-                continue;
-            }
-
-            // Visit each neighbor of the current node that hasn't been visited yet
-            foreach (Node neighbor in current.GetNeighbors())
+            else
             {
-                if (!visited.Contains(neighbor))
+                // Visit each neighbor of the current node that hasn't been visited yet
+                foreach (Node neighbor in current.GetNeighbors())
                 {
-                    stack.Push(neighbor);
-                    visited.Add(neighbor);
-                    neighbor.SetParent(current);
+                    if (!visited.Contains(neighbor))
+                    {
+                        stack.Push(neighbor);
+                        visited.Add(neighbor);
+                        neighbor.SetParent(current);
+                    }
                 }
             }
         }
@@ -198,17 +195,17 @@ public class Graph
 
 
     /// <summary>
-    /// return the minimum distance from the starting point to the point with Y-coordinate equal
+    /// return the minimum distance from the starting cell to the cell with Y-coordinate equal
     /// to y using BFS algorithm,also count the shortest paths 
     /// </summary>
-    /// <param name="point"> the point we calculate from</param>
+    /// <param name="cell"> the cell we calculate from</param>
     /// <param name="y">the wanted y</param>
     /// <returns></returns>
-    public int GetMinimumDistanceToY(Point point, int y)
+    public int GetMinimumDistanceToY(Cell cell, int y)
     {
         ResetGraph();
         // Find the starting node based on its coordinates
-        Node start = _nodes[point.X + point.Y * BoardSize];
+        Node start = _nodes[cell.X + cell.Y * BoardSize];
 
         // Initialize BFS variables
         Queue<Node> queue = new Queue<Node>();
@@ -251,20 +248,20 @@ public class Graph
 
     }
     /// <summary>
-    ///  check if there is a path for each of the two points to the point with Y-coordinate equal to y.
-    ///  every point represent the pawn's position on the board and y represent the Y-coordinate of the point that
-    ///  the pawn should reach. The function return true if there is a path for each of the two points to the point
+    ///  check if there is a path for each of the two points to the cell with Y-coordinate equal to y.
+    ///  every cell represent the pawn's position on the board and y represent the Y-coordinate of the cell that
+    ///  the pawn should reach. The function return true if there is a path for each of the two cells to the cell
     ///  with Y-coordinate equal to y and false otherwise.
     /// </summary>
-    /// <param name="point1"> one of the pawns position</param>
+    /// <param name="cell1"> one of the pawns position</param>
     /// <param name="y1"> the row he needs to win</param>
-    /// <param name="point2"> one of the pawns position</param>
+    /// <param name="cell2"> one of the pawns position</param>
     /// <param name="y2">the row he needs to win</param>
     /// <returns></returns>
-    public bool IsPathsExist(Point point1, int y1, Point point2, int y2)
+    public bool IsPathsExist(Cell cell1, int y1, Cell cell2, int y2)
     {
-        int distance1 = GetMinimumDistanceToY(point1, y1);
-        int distance2 = GetMinimumDistanceToY(point2, y2);
+        int distance1 = GetMinimumDistanceToY(cell1, y1);
+        int distance2 = GetMinimumDistanceToY(cell2, y2);
         return distance1 != -1 && distance2 != -1;
     }
     public int GetMinimumPathsCount()

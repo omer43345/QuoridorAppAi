@@ -45,13 +45,13 @@ public class GameFormController
     // making a new move from the given cords and update the game logic
     public void MovePawn(int x, int y)
     {
-        Move move = new Move(new Point(x, y));
+        Move move = new Cell(x, y);
         _game.MakeMove(move);
     }
     // making a new move from wall type from the given cords and orientation of the wall and update the game logic
     public bool PlaceWall(int x, int y, bool orientation)
     {
-        Move move = new Move(new Wall(orientation, x, y));
+        Move move = new Wall(orientation,x,y);
         return _game.MakeMove(move);
     }
 
@@ -62,7 +62,7 @@ public class GameFormController
     }
     
     // return the allowed points to move from the game logic
-    public List<Point> GetPossibleSquares()
+    public List<Cell> GetPossibleSquares()
     {
         return _game.GetAllowedMoves();
     }
@@ -87,14 +87,14 @@ public class GameFormController
     // update the game form in the given move to visualize the move
     public void UpdateBoard(Move move)
     {
-        if (move.GetMoveType())
+        if (move.GetType()==typeof(Wall))
         {
-            _gameForm.PlaceComputerWall(move.GetWallToPlace().X, move.GetWallToPlace().Y,
-                move.GetWallToPlace().Orientation);
+            Wall wall = (Wall) move;
+            _gameForm.PlaceComputerWall(wall.X, wall.Y, wall.Orientation);
         }
         else
         {
-            _gameForm.MoveComputerPawn(move.GetPointToMove());
+            _gameForm.MoveComputerPawn(new Point(move.X, move.Y));
         }
     }
 }

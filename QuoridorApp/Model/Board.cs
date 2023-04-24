@@ -1,6 +1,4 @@
-﻿
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using static QuoridorApp.Constants;
 
 namespace QuoridorApp.Model;
@@ -9,7 +7,7 @@ namespace QuoridorApp.Model;
 public class Board
 {
     private readonly Pawn[] _pawns; // array of pawns that contains the user pawn and the computer pawn
-    private List<Point>[,] _board; // Two dimensional array that representing the board when every square has a list of points that can be reached from it
+    private List<Cell>[,] _board; // Two dimensional array that representing the board when every square has a list of points that can be reached from it
     private bool _specialMove; // boolean that indicates if the last move was a special move 
     private readonly Game _game; // instance of the game class
 
@@ -19,7 +17,7 @@ public class Board
         _pawns = new Pawn[2];
         _pawns[UserInd] = new Pawn(UserPawnStartingPoint);
         _pawns[AiInd] = new Pawn(ComputerPawnStartingPoint);
-        _board = new List<Point>[BoardSize, BoardSize];
+        _board = new List<Cell>[BoardSize, BoardSize];
         _game = Game.GetInstance();
         InitBoard();
     }
@@ -31,7 +29,7 @@ public class Board
         {
             for (int j = 0; j < BoardSize; j++)
             {
-                _board[i, j] = _game.GetPossibleSquares(new Point(j, i));
+                _board[i, j] = _game.GetPossibleSquares(new Cell(j, i));
             }
         }
     }
@@ -55,22 +53,22 @@ public class Board
         bool orientation = wall.Orientation;
         if (orientation)
         {
-            _board[y, x].Remove(new Point(x + 1, y));
-            _board[y, x + 1].Remove(new Point(x, y));
-            _board[y + 1, x].Remove(new Point(x + 1, y + 1));
-            _board[y + 1, x + 1].Remove(new Point(x, y + 1));
+            _board[y, x].Remove(new Cell(x + 1, y));
+            _board[y, x + 1].Remove(new Cell(x, y));
+            _board[y + 1, x].Remove(new Cell(x + 1, y + 1));
+            _board[y + 1, x + 1].Remove(new Cell(x, y + 1));
         }
         else
         {
-            _board[y, x].Remove(new Point(x, y + 1));
-            _board[y, x + 1].Remove(new Point(x + 1, y + 1));
-            _board[y + 1, x].Remove(new Point(x, y));
-            _board[y + 1, x + 1].Remove(new Point(x + 1, y));
+            _board[y, x].Remove(new Cell(x, y + 1));
+            _board[y, x + 1].Remove(new Cell(x + 1, y + 1));
+            _board[y + 1, x].Remove(new Cell(x, y));
+            _board[y + 1, x + 1].Remove(new Cell(x + 1, y));
         }
     }
 
     // move the pawn in the given turn to the given location and check if the move is a special move and update the board accordingly
-    public void MovePawn(int turn, Point newLocation)
+    public void MovePawn(int turn, Cell newLocation)
     {
         _pawns[turn].SetLocation(newLocation);
         CheckSpecialMove();
@@ -109,7 +107,7 @@ public class Board
         {
             for (int j = 0; j < BoardSize; j++)
             {
-                _board[i, j] = new List<Point>();
+                _board[i, j] = new List<Cell>();
             }
         }
 
@@ -135,7 +133,7 @@ public class Board
         AddSpecialPoints(yCase, pawn2, pawn1, false);
     }
 
-    // adding the special point to pawn2 according to the given parameters: the two pawns indexes, the case (y or x) and if pawn1 is above or below pawn2
+    // adding the special cells to pawn2 according to the given parameters: the two pawns indexes, the case (y or x) and if pawn1 is above or below pawn2
     private void AddSpecialPoints(bool yCase, int pawn1, int pawn2, bool above)
     {
         // the points that can be reached from the squares that the pawns are in
@@ -148,20 +146,20 @@ public class Board
         // checking what points i should add according to what are reachable from the squares that the pawns are in
         
         if (_board[_pawns[pawn1].Location.Y, _pawns[pawn1].Location.X]
-            .Contains(new Point(_pawns[pawn1].Location.X + addWhenAboveX, _pawns[pawn1].Location.Y + addWhenAboveY)))
+            .Contains(new Cell(_pawns[pawn1].Location.X + addWhenAboveX, _pawns[pawn1].Location.Y + addWhenAboveY)))
         {
             _board[_pawns[pawn2].Location.Y, _pawns[pawn2].Location.X].Add(
-                new Point(_pawns[pawn1].Location.X + addWhenAboveX, _pawns[pawn1].Location.Y + addWhenAboveY));
+                new Cell(_pawns[pawn1].Location.X + addWhenAboveX, _pawns[pawn1].Location.Y + addWhenAboveY));
             return;
         }
         if (_board[_pawns[pawn1].Location.Y, _pawns[pawn1].Location.X]
-            .Contains(new Point(_pawns[pawn1].Location.X - addWhenYCase, _pawns[pawn1].Location.Y - addWhenXCase)))
+            .Contains(new Cell(_pawns[pawn1].Location.X - addWhenYCase, _pawns[pawn1].Location.Y - addWhenXCase)))
             _board[_pawns[pawn2].Location.Y, _pawns[pawn2].Location.X].Add(
-                new Point(_pawns[pawn1].Location.X - addWhenYCase, _pawns[pawn1].Location.Y - addWhenXCase));
+                new Cell(_pawns[pawn1].Location.X - addWhenYCase, _pawns[pawn1].Location.Y - addWhenXCase));
         if (_board[_pawns[pawn1].Location.Y, _pawns[pawn1].Location.X]
-            .Contains(new Point(_pawns[pawn1].Location.X + addWhenYCase, _pawns[pawn1].Location.Y + addWhenXCase)))
+            .Contains(new Cell(_pawns[pawn1].Location.X + addWhenYCase, _pawns[pawn1].Location.Y + addWhenXCase)))
             _board[_pawns[pawn2].Location.Y, _pawns[pawn2].Location.X].Add(
-                new Point(_pawns[pawn1].Location.X + addWhenYCase, _pawns[pawn1].Location.Y + addWhenXCase));
+                new Cell(_pawns[pawn1].Location.X + addWhenYCase, _pawns[pawn1].Location.Y + addWhenXCase));
     }
 
     public int GetWallCount(int turn)
@@ -169,23 +167,23 @@ public class Board
         return _pawns[turn].GetWallCount();
     }
 
-    public List<Point> GetAllowedMoves(int turn)
+    public List<Cell> GetAllowedMoves(int turn)
     {
         return _board[_pawns[turn].Location.Y, _pawns[turn].Location.X];
     }
 
     // return a copy of the board so the user can't change the board
-    public List<Point>[,] GetBoardCopy()
+    public List<Cell>[,] GetBoardCopy()
     {
-        List<Point>[,] boardCopy = new List<Point>[BoardSize, BoardSize];
+        List<Cell>[,] boardCopy = new List<Cell>[BoardSize, BoardSize];
         for (int i = 0; i < BoardSize; i++)
         {
             for (int j = 0; j < BoardSize; j++)
             {
-                boardCopy[i, j] = new List<Point>();
-                foreach (var point in _board[i, j])
+                boardCopy[i, j] = new List<Cell>();
+                foreach (var cell in _board[i, j])
                 {
-                    boardCopy[i, j].Add(point);
+                    boardCopy[i, j].Add(cell);
                 }
             }
         }
@@ -196,8 +194,8 @@ public class Board
     private void MakeTheSameStates(Board board)
     {
         this._board = board.GetBoardCopy();
-        this._pawns[UserInd].Location = new Point(board.GetPawnLocation(UserInd).X, board.GetPawnLocation(UserInd).Y);
-        this._pawns[AiInd].Location = new Point(board.GetPawnLocation(AiInd).X, board.GetPawnLocation(AiInd).Y);
+        this._pawns[UserInd].Location = new Cell(board.GetPawnLocation(UserInd).X, board.GetPawnLocation(UserInd).Y);
+        this._pawns[AiInd].Location = new Cell(board.GetPawnLocation(AiInd).X, board.GetPawnLocation(AiInd).Y);
         this._pawns[UserInd].SetWallCount(board.GetWallCount(UserInd));
         this._pawns[AiInd].SetWallCount(board.GetWallCount(AiInd));
     }
@@ -206,7 +204,7 @@ public class Board
     {
         _pawns[turn].RemoveWall();
     }
-    public Point GetPawnLocation(int turn)
+    public Cell GetPawnLocation(int turn)
     {
         return _pawns[turn].Location;
     }

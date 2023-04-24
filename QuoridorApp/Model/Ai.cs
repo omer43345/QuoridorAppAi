@@ -1,6 +1,4 @@
-﻿
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using static QuoridorApp.Constants;
 
 namespace QuoridorApp.Model;
@@ -32,8 +30,8 @@ public class Ai
         double bestEval = int.MinValue;
         Move bestMove = null;
         IEnumerable<Move> possibleMoves = _game.GetPossibleMoves();
-        Point userSquare = _board.GetPawnLocation(UserInd);
-        Point aiSquare = _board.GetPawnLocation(AiInd);
+        Cell userSquare = _board.GetPawnLocation(UserInd);
+        Cell aiSquare = _board.GetPawnLocation(AiInd);
         int userWalls = _board.GetWallCount(UserInd);
         int aiWalls = _board.GetWallCount(AiInd);
         foreach (Move move in possibleMoves)
@@ -60,23 +58,23 @@ public class Ai
     /// <param name="aiWalls"></param>
     /// <param name="aiSquare"></param>
     /// <returns></returns>
-    private bool MakeTempMove(Move move, ref int aiWalls, ref Point aiSquare)
+    private bool MakeTempMove(Move move, ref int aiWalls, ref Cell aiSquare)
     {
-        if (move.GetMoveType())
+        if (move.GetType()==typeof(Wall))
         {
-            _graph.AddBoundary(move.GetWallToPlace());
+            _graph.AddBoundary((Wall)move);
             if (!_graph.IsPathsExist(_board.GetPawnLocation(UserInd), ComputerPawnStartingPoint.Y, aiSquare,
                     UserPawnStartingPoint.Y))
             {
-                _graph.RemoveBoundary(move.GetWallToPlace());
+                _graph.RemoveBoundary((Wall)move);
                 return false;
             }
-            _board.PlaceWall(AiInd, move.GetWallToPlace());
+            _board.PlaceWall(AiInd, (Wall)move);
             aiWalls--;
         }
         else
         {
-            aiSquare = move.GetPointToMove();
+            aiSquare = (Cell)move;
             _board.MovePawn(AiInd, aiSquare);
         }
         if (_board.GetIfSpecialMove())
@@ -90,11 +88,11 @@ public class Ai
     /// <param name="move"></param>
     /// <param name="aiWalls"></param>
     /// <param name="aiSquare"></param>
-    private void UndoAiMove(Move move, ref int aiWalls, ref Point aiSquare)
+    private void UndoAiMove(Move move, ref int aiWalls, ref Cell aiSquare)
     {
-        if (move.GetMoveType())
+        if (move.GetType()==typeof(Wall))
         {
-            _graph.RemoveBoundary(move.GetWallToPlace());
+            _graph.RemoveBoundary((Wall)move);
             _board.RemoveWall(AiInd);
             aiWalls++;
         }
@@ -116,30 +114,34 @@ public class Ai
     ///  evaluate the move taking into account the shortest path to the other side, the number of walls left,
     ///  number of paths to the other side and number of paths that are the shortest paths to the other side.
     /// </summary>
-    /// <param name="pointUser"> the point the user is on</param>
-    /// <param name="pointAi">the point the ai is on</param>
+    /// <param name="userCell"> the cell the user is on</param>
+    /// <param name="aiCell">the cell the ai is on</param>
     /// <param name="userWalls">the number of walls left for the user</param>
     /// <param name="aiWalls">the number of walls left for the ai</param>
     /// <returns></returns>
-    private double EvaluateMove(Point pointUser, Point pointAi, int userWalls, int aiWalls)
+    private double EvaluateMove(Cell userCell, Cell aiCell, int userWalls, int aiWalls)
     {
         // calculate for each player what the shortest path to the other side is and how many paths there are to the other side
-        int userPathToWin = _graph.GetMinimumDistanceToY(pointUser, ComputerPawnStartingPoint.Y);
+        int userPathToWin = _graph.GetMinimumDistanceToY(userCell, ComputerPawnStartingPoint.Y);
         int userMinPaths = _graph.GetMinimumPathsCount();
-        int aiPathToWin = _graph.GetMinimumDistanceToY(pointAi, UserPawnStartingPoint.Y);
+        int aiPathToWin = _graph.GetMinimumDistanceToY(aiCell, UserPawnStartingPoint.Y);
         int aiMinPaths = _graph.GetMinimumPathsCount();
+        
         // calculate the evaluation of the move taking into account the the number of walls left.
         double aiEval = aiPathToWin * ShortestPathWeight+(userWalls <= aiWalls ? 0 : (userWalls-aiWalls) * NumberOfWallsWeight);
         double userEval = userPathToWin * ShortestPathWeight+(userWalls >= aiWalls ? 0 : (aiWalls-userWalls) * NumberOfWallsWeight);
+        
         // if the player has number of paths that all are the shortest paths to the other side, give him a bonus.
-        double aiMinPathEval = aiMinPaths == _graph.CountPathsToY(pointAi, UserPawnStartingPoint.Y) ? aiMinPaths * PathCountWeight : 0;
-        double userMinPathEval = userMinPaths == _graph.CountPathsToY(pointUser, ComputerPawnStartingPoint.Y) ? userMinPaths * PathCountWeight : 0;
+        double aiMinPathEval = aiMinPaths == _graph.CountPathsToY(aiCell, UserPawnStartingPoint.Y) ? aiMinPaths * PathCountWeight : 0;
+        double userMinPathEval = userMinPaths == _graph.CountPathsToY(userCell, ComputerPawnStartingPoint.Y) ? userMinPaths * PathCountWeight : 0;
         double eval = userEval - aiEval;
+        
         // if the user can win in the next move and the ai can not win in the current move reduce the evaluation to the minimum.
-        eval -= userPathToWin == 1 && aiPathToWin != 0 ? 10000 : 0;
+        eval -= userPathToWin <= 2 && aiPathToWin != 0 ? LoseOption : 0;
+        
         // if the player has only one path to the other side, give him a bonus.
-        eval += _graph.CountPathsToY(pointAi, UserPawnStartingPoint.Y) ==1 ? OnePathBonus : 0;
-        eval -= _graph.CountPathsToY(pointUser, ComputerPawnStartingPoint.Y) ==1 ?OnePathBonus : 0;
+        eval += _graph.CountPathsToY(aiCell, UserPawnStartingPoint.Y) ==1 ? OnePathBonus : 0;
+        eval -= _graph.CountPathsToY(userCell, ComputerPawnStartingPoint.Y) ==1 ?OnePathBonus : 0;
         double createMinimumPathOption = aiMinPathEval - userMinPathEval;
         return eval + createMinimumPathOption;
     }

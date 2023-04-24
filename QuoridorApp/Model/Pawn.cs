@@ -6,18 +6,18 @@ namespace QuoridorApp.Model
     // class that represents a pawn on the board and have 3 properties: location, last location and wall count that the pawn has left 
     public class Pawn
     {
-        public Point Location;
+        public Cell Location;
         private int _wallCount; // the number of walls that the pawn has left
-        public Point LastLocation;
+        public Cell LastLocation;
 
-        public Pawn(Point startLocation)
+        public Pawn(Cell startLocation)
         {
             Location = startLocation;
             _wallCount = WallsPerPlayer;
         }
 
         // method that sets the location of the pawn to the new location and saves the last location of the pawn
-        public void SetLocation(Point newLocation)
+        public void SetLocation(Cell newLocation)
         {
             LastLocation = Location;
             Location = newLocation;

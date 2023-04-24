@@ -54,6 +54,7 @@
     <Compile Include="Controller\GameFormController.cs" />
     <Compile Include="Controller\Program.cs" />
     <Compile Include="Model\Ai.cs" />
+    <Compile Include="Model\Cell.cs" />
     <Compile Include="Model\Move.cs" />
     <Compile Include="Model\Board.cs" />
     <Compile Include="Model\Game.cs" />

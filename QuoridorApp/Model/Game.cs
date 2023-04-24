@@ -56,15 +56,20 @@ namespace QuoridorApp.Model
         }
 
         /// <summary>
-        ///  Move the pawn that his turn to the new location and check if the game is over
+        /// Move the pawn that his turn to the new location and check if the game is over
         /// </summary>
         /// <param name="newLocation"></param>
-        private void MovePawn(Point newLocation)
+        /// <returns>return if a player has won</returns>
+        private bool MovePawn(Cell newLocation)
         {
             _board.MovePawn(_turn, newLocation);
             if ((newLocation.Y == ComputerPawnStartingPoint.Y && _turn == UserInd) ||
                 (newLocation.Y == UserPawnStartingPoint.Y && _turn == AiInd))
+            {
                 _gameFormController.GameOver(_turn == UserInd ? WinnerMessage : LoserMessage);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -102,6 +107,7 @@ namespace QuoridorApp.Model
             if (isAi)
                 _gameFormController.UpdateBoard(move);
             bool doneSuccessfully = true;
+            bool won = false;
             // if was a special move, remove the special move points and update the graph
             if (_board.GetIfSpecialMove())
             {
@@ -109,11 +115,13 @@ namespace QuoridorApp.Model
                 _graph = new Graph(_board);
             }
             // if the move is a wall, place the wall, otherwise move the pawn
-            if (move.GetMoveType())
-                doneSuccessfully = PlaceWall(move.GetWallToPlace());
+            if (move.GetType()==typeof(Wall))
+                doneSuccessfully = PlaceWall((Wall)move);
             else
-                MovePawn(move.GetPointToMove());
+                won = MovePawn(new Cell(move.X, move.Y));
             // if the move was not valid, return false
+            if(won)
+                return true;
             if (!doneSuccessfully)
                 return false;
             // if in the new game state there is a special move, update the graph
@@ -137,27 +145,27 @@ namespace QuoridorApp.Model
         }
 
         /// <summary>
-        /// return list of possible point to move to from the given point
+        /// return list of possible cells to move to from the given cell
         /// </summary>
         /// <param name="square"></param>
         /// <returns></returns>
-        public List<Point> GetPossibleSquares(Point square)
+        public List<Cell> GetPossibleSquares(Cell square)
         {
             int x = square.X;
             int y = square.Y;
-            Dictionary<string, Point> possibleSquares = new Dictionary<string, Point>
+            Dictionary<string, Cell> possibleSquares = new Dictionary<string, Cell>
             {
-                { Down, new Point(x, y + 1) },
-                { Up, new Point(x, y - 1) },
-                { Left, new Point(x - 1, y) },
-                { Right, new Point(x + 1, y) }
+                { Down, new Cell(x, y + 1) },
+                { Up, new Cell(x, y - 1) },
+                { Left, new Cell(x - 1, y) },
+                { Right, new Cell(x + 1, y) }
             };
             BoundariesCheck(possibleSquares);
             return possibleSquares.Values.ToList();
         }
 
 
-        public List<Point> GetAllowedMoves()
+        public List<Cell> GetAllowedMoves()
         {
             return _board.GetAllowedMoves(_turn);
         }
@@ -169,23 +177,28 @@ namespace QuoridorApp.Model
         /// <param name="placedWall">the wall that was placed</param>
         private void UpdateWallList(Wall placedWall)
         {
-            foreach (var wall in _allowedWalls)
+            var wallKeys = _allowedWalls.Keys.ToList();
+            int key = 0;
+            bool foundWall = false;
+            while (key < wallKeys.Count && !foundWall)
             {
-                if (placedWall.Equals(wall.Value))
+                if (placedWall.Equals(_allowedWalls[wallKeys[key]]))
                 {
                     int index = placedWall.Orientation
                         ? placedWall.Y * WallsPerRowAndColumn + placedWall.X + (NumberOfWallsInTheBoard / 2)
                         : placedWall.Y + placedWall.X * WallsPerRowAndColumn;
-                    _allowedWalls.Remove(wall.Key);
-                    if((wall.Key+1) % WallsPerRowAndColumn != 0)
-                        _allowedWalls.Remove(wall.Key + 1);
-                    if(wall.Key % WallsPerRowAndColumn != 0)
-                        _allowedWalls.Remove(wall.Key - 1);
+                    _allowedWalls.Remove(wallKeys[key]);
+                    if((wallKeys[key]+1) % WallsPerRowAndColumn != 0)
+                        _allowedWalls.Remove(wallKeys[key] + 1);
+                    if(wallKeys[key] % WallsPerRowAndColumn != 0)
+                        _allowedWalls.Remove(wallKeys[key] - 1);
                     _allowedWalls.Remove(index);
-                    break;
+                    foundWall = true;
                 }
+                key++;
             }
         }
+
 
         public int[] GetAllowedWallsIndexes()
         {
@@ -196,7 +209,7 @@ namespace QuoridorApp.Model
         /// remove the squares that are out of the board boundaries
         /// </summary>
         /// <param name="possibleSquares">Dictionary of the possible squares to move</param>
-        private void BoundariesCheck(Dictionary<String, Point> possibleSquares)
+        private void BoundariesCheck(Dictionary<String, Cell> possibleSquares)
         {
             for (int i = possibleSquares.Keys.Count - 1; i >= 0; i--)
             {
@@ -245,16 +258,16 @@ namespace QuoridorApp.Model
         public IEnumerable<Move> GetPossibleMoves()
         {
             List<Move> moves = new List<Move>();
-            foreach (var point in GetAllowedMoves())
+            foreach (var cellMove in GetAllowedMoves())
             {
-                moves.Add(new Move(point));
+                moves.Add(new Cell(cellMove.X, cellMove.Y));
             }
 
             if (CanPlaceWall())
             {
                 foreach (var wall in _allowedWalls)
                 {
-                    moves.Add(new Move(new Wall(wall.Value.Orientation, wall.Value.X, wall.Value.Y)));
+                    moves.Add(new Wall(wall.Value.Orientation, wall.Value.X, wall.Value.Y));
                 }
             }
 

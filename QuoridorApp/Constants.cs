@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using QuoridorApp.Model;
 
 namespace QuoridorApp;
 
@@ -10,8 +11,8 @@ public static class Constants
     public const int NumberOfWallsInTheBoard = 128;
     public const int WallsPerPlayer = 10;
     public const int WallsPerRowAndColumn = 8;
-    public static Point UserPawnStartingPoint = new(4, 8);
-    public static Point ComputerPawnStartingPoint = new(4, 0);
+    public static readonly Cell UserPawnStartingPoint = new Cell(4, 8);
+    public static readonly Cell ComputerPawnStartingPoint = new Cell(4, 0);
     public const string WinnerMessage = "Congratulations! You beat the computer!";
     public const string LoserMessage = "You lost! Better luck next time!";
     public const string RestartMessage = "Do you want to play again?";
@@ -26,6 +27,7 @@ public static class Constants
     public const double ShortestPathWeight = 3.2; // Weight of the shortest path in the evaluation function
     public const double PathCountWeight = 5; // Weight when the number of paths is equal to the number of shortest paths in the evaluation function
     public const double OnePathBonus = 100; // bonus for having only one path
+    public const int LoseOption = 10000;// punishment for a move that leads to a loss
     public const string QuoridorRules =
         "Quoridor is played on a game board of 81 square spaces (9x9). Each player is represented by a pawn which" +
         " begins at the center space of one edge of the board (in a two-player game, the pawns begin opposite each other)." +
